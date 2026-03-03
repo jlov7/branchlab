@@ -1,0 +1,14 @@
+node_modules
+.next
+dist
+.turbo
+.env
+.env.local
+.DS_Store
+.atl
+.atl-pre-restore-*
+artifacts/*
+!artifacts/.gitkeep
+playwright-report
+test-results
+*.tsbuildinfo

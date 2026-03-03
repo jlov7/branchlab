@@ -1,0 +1,46 @@
+{
+  "name": "@branchlab/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev -p ${PORT:-3000}",
+    "build": "next build",
+    "start": "next start -p ${PORT:-3000}",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "e2e": "rm -rf .next && tsx scripts/run_playwright.ts",
+    "e2e:visual": "rm -rf .next && tsx scripts/run_playwright.ts tests/e2e/visual-regression.spec.ts",
+    "e2e:matrix": "rm -rf .next && tsx scripts/run_playwright.ts -c playwright.matrix.config.ts tests/e2e/visual-regression.spec.ts",
+    "demo": "tsx scripts/demo.ts",
+    "migrate:up": "tsx scripts/migrate.ts up",
+    "migrate:down": "tsx scripts/migrate.ts down",
+    "migrate:status": "tsx scripts/migrate.ts status",
+    "backup": "tsx scripts/backup.ts",
+    "restore": "tsx scripts/restore.ts",
+    "recover": "tsx scripts/recover.ts",
+    "perf:budget": "tsx scripts/perf_budget.ts",
+    "profile:harness": "tsx scripts/profile_harness.ts",
+    "benchmark:suite": "tsx scripts/benchmark_suite.ts"
+  },
+  "dependencies": {
+    "@branchlab/core": "workspace:*",
+    "@branchlab/policy": "workspace:*",
+    "@monaco-editor/react": "^4.7.0",
+    "@tanstack/react-virtual": "^3.13.12",
+    "jsondiffpatch": "^0.7.3",
+    "lucide-react": "^0.542.0",
+    "next": "^15.5.2",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "zod": "^4.1.5"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.11.0",
+    "@playwright/test": "^1.55.0",
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.9",
+    "eslint-config-next": "^15.5.2"
+  }
+}

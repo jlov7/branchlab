@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520">
+  <defs>
+    <style>
+      .bg { fill: #060b14; }
+      .card { fill: #0b1220; stroke: #2b3340; stroke-width: 2; rx: 16; }
+      .title { font: 700 18px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto; fill: #e6edf3; }
+      .text { font: 14px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto; fill: #a9b4c0; }
+      .arrow { stroke: #6e7681; stroke-width: 2; marker-end: url(#m); }
+      .badge { fill: #111827; stroke: #8b5cf6; stroke-width: 2; rx: 10; }
+      .btxt { font: 12px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas; fill: #c9d1d9; }
+    </style>
+    <marker id="m" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0,0 L10,3 L0,6 Z" fill="#6e7681"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1200" height="520" class="bg"/>
+
+  <text x="40" y="60" class="title">Core user flow</text>
+
+  <rect x="40" y="90" width="260" height="120" class="card"/>
+  <text x="70" y="130" class="title">1) Import</text>
+  <text x="70" y="160" class="text">Upload JSONL or</text>
+  <text x="70" y="182" class="text">Try demo trace</text>
+
+  <rect x="340" y="90" width="260" height="120" class="card"/>
+  <text x="370" y="130" class="title">2) Replay</text>
+  <text x="370" y="160" class="text">Timeline + inspector</text>
+
+  <rect x="640" y="90" width="260" height="120" class="card"/>
+  <text x="670" y="130" class="title">3) Fork</text>
+  <text x="670" y="160" class="text">Override prompt /</text>
+  <text x="670" y="182" class="text">tool / memory / policy</text>
+
+  <rect x="940" y="90" width="220" height="120" class="card"/>
+  <text x="970" y="130" class="title">4) Compare</text>
+  <text x="970" y="160" class="text">Diff + first divergence</text>
+
+  <line x1="300" y1="150" x2="340" y2="150" class="arrow"/>
+  <line x1="600" y1="150" x2="640" y2="150" class="arrow"/>
+  <line x1="900" y1="150" x2="940" y2="150" class="arrow"/>
+
+  <rect x="340" y="250" width="820" height="210" class="card"/>
+  <text x="370" y="290" class="title">Policy Lab (parallel workflow)</text>
+  <text x="370" y="320" class="text">Load a policy → evaluate runs → see impact preview</text>
+  <text x="370" y="350" class="text">“Would this policy have blocked successful runs?”</text>
+
+  <line x1="470" y1="210" x2="470" y2="250" class="arrow"/>
+
+  <rect x="60" y="430" width="170" height="34" class="badge"/>
+  <text x="75" y="452" class="btxt">Replay = deterministic</text>
+
+  <rect x="250" y="430" width="250" height="34" class="badge"/>
+  <text x="265" y="452" class="btxt">Re-exec = opt-in & labeled</text>
+</svg>

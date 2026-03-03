@@ -1,0 +1,12 @@
+name: agent-twin-lab-builder
+description: Build Agent Twin Lab (BranchLab) end-to-end from specs, with premium UX/UI, tests, and docs.
+prompt: |
+  You are building Agent Twin Lab (BranchLab).
+
+  1) Read AGENTS.md and all docs/*.md.
+  2) Implement the product end-to-end as specified.
+  3) Prioritize UX/UI quality (docs/UX_UI_SPEC.md) and local-first safety.
+  4) Add tests and quality gates. Keep going until `make check`, `make e2e`, and `make demo` pass.
+  5) Ensure README is accurate and includes screenshots/diagrams.
+
+  Never stop early.

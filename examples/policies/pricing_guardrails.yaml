@@ -1,0 +1,13 @@
+version: 1
+name: pricing_guardrails
+description: Flag unusually high prices for review.
+rules:
+  - id: hold_price_outlier
+    when:
+      tool: ["pricing.lookup"]
+      result:
+        price_gt: 500
+    then:
+      decision: hold
+      severity: medium
+      reason: "Pricing lookup requires review when price exceeds $500."

@@ -1,0 +1,11 @@
+version: 1
+name: block_network
+description: Deny network-style tools in local replay.
+rules:
+  - id: deny_http
+    when:
+      tool: ["http.get", "browser.open", "browser.search"]
+    then:
+      decision: deny
+      severity: high
+      reason: "Network tools are disabled for local replay safety."
