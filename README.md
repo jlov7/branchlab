@@ -1,188 +1,165 @@
-# Agent Twin Lab (BranchLab)
+# BranchLab
 
-Replay, fork, and compare AI agent runs locally with deterministic evidence, policy impact simulation, and counterfactual debugging.
+```text
+ ____                        _      _          _
+| __ ) _ __ __ _ _ __   ___ | |__  | |    __ _| |__
+|  _ \| '__/ _` | '_ \ / __|| '_ \ | |   / _` | '_ \
+| |_) | | | (_| | | | | (__ | | | || |__| (_| | |_) |
+|____/|_|  \__,_|_| |_|\___||_| |_||_____\__,_|_.__/
+
+Agent Twin Lab: replay, fork, compare, and govern AI agent runs.
+```
+
+BranchLab is a local-first reliability and governance cockpit for AI agents. It turns traces into a "digital twin" so you can inspect exactly what happened, run counterfactual branches, test policy impact, and export evidence-grade reports.
+
+## Why BranchLab
+
+- Deterministic replay for root-cause analysis.
+- Counterfactual branching to prove what changed outcomes.
+- Policy simulation before production rollouts.
+- Security-first local workflow with redacted exports by default.
+
+## Product At A Glance
 
 <p align="center">
-  <img src="assets/diagrams/ux_flow.svg" width="860" alt="BranchLab user flow" />
+  <img src="docs/assets/screenshots/landing.png" width="31%" alt="BranchLab landing screen" />
+  <img src="docs/assets/screenshots/runs.png" width="31%" alt="BranchLab runs screen" />
+  <img src="docs/assets/screenshots/compare.png" width="31%" alt="BranchLab compare screen" />
 </p>
 
-## What this does
+## Two Reading Paths
 
-BranchLab treats an agent trace as a digital twin:
-- replay exactly what happened
-- fork at a step with structured interventions
-- compare parent vs branch with divergence-aware diffs
-- evaluate policy impact across runs
-- export an internal report bundle (redacted by default)
+### Non-Technical Path
 
-## Core capabilities
+Start here if you are a product leader, stakeholder, or reviewer.
 
-- Deterministic replay with timeline + inspector (raw and rendered event views)
-- Product shell UX:
-  - command palette (`Cmd/Ctrl+K`)
-  - keyboard help (`?`)
-  - dark/light theme toggle
-  - responsive mobile nav drawer
-- Counterfactual branching:
-  - prompt edit
-  - tool output override
-  - policy override
-  - memory removal
-- Compare view:
-  - first divergence
-  - changed event counts
-  - semantic JSON diff
-  - outcome/cost/policy deltas
-- Blame suggestions (top candidates from trace heuristics)
-- Policy Lab:
-  - YAML rules backend
-  - Rego/WASM backend (OPA-compatible)
-- Background jobs for import/policy/export with progress + cancel APIs
-- Saved run views, compare presets, run annotations, and branch templates
-- Local-first persistence:
-  - SQLite metadata
-  - content-addressed blobs in `.atl/blobs/`
-- Export bundle:
-  - `report.html`
-  - `run.json`
-  - `diff.json`
-  - `policy_results.json`
+1. [Non-Technical Overview](docs/NON_TECHNICAL_OVERVIEW.md)
+2. [Demo Script](docs/DEMO_SCRIPT.md)
+3. [Release Report](docs/RELEASE_REPORT.md)
 
-## Tech stack
+### Technical Path
 
-- Next.js + TypeScript app: `apps/web`
-- Core trace/diff/blame logic: `packages/core`
-- Policy engine (YAML + Rego/WASM): `packages/policy`
-- Trace instrumentation helpers: `packages/sdk`
-- Monorepo orchestration: Turborepo + pnpm workspaces
+Start here if you are implementing, extending, or operating BranchLab.
 
-## Quickstart
+1. [Onboarding Guide](docs/ONBOARDING.md)
+2. [Architecture](docs/ARCHITECTURE.md)
+3. [Technical Deep Dive](docs/TECHNICAL_DEEP_DIVE.md)
+4. [API Contracts](docs/API_CONTRACTS.md)
 
-### 1) Install
+## Architecture Overview
+
+```mermaid
+flowchart LR
+    UI["Next.js Web App\napps/web"] --> API["API Routes"]
+    API --> CORE["Core Engine\npackages/core"]
+    API --> POLICY["Policy Engine\npackages/policy"]
+    API --> DB[("SQLite\n.atl/branchlab.sqlite")]
+    API --> BLOBS[("Blob Store\n.atl/blobs/<sha256>.json")]
+    CORE --> DB
+    CORE --> BLOBS
+    POLICY --> DB
+    SDK["Trace SDK\npackages/sdk"] --> INTAKE["JSONL Traces"]
+    INTAKE --> API
+```
+
+<p align="center">
+  <img src="assets/diagrams/architecture.svg" width="920" alt="BranchLab architecture illustration" />
+</p>
+
+## User Journey (Import To Decision)
+
+```mermaid
+flowchart TD
+    A["Import Trace"] --> B["Normalize + Validate"]
+    B --> C["Inspect Timeline"]
+    C --> D["Fork Counterfactual"]
+    D --> E["Replay or Re-execute"]
+    E --> F["Compare Outcomes"]
+    F --> G["Evaluate Policies"]
+    G --> H["Export Redacted Report"]
+```
+
+## Core Capabilities
+
+- Timeline replay with raw and rendered event inspection.
+- Branching interventions: prompt edit, tool output override, memory removal, policy override.
+- Compare view with first divergence, semantic diffs, cost/outcome deltas, and blame heuristics.
+- Policy Lab with YAML and Rego/WASM paths.
+- Background jobs with progress/cancel for import, policy evaluation, and export.
+- Keyboard-first UX (`Cmd/Ctrl+K`, `?`, `J/K/Enter/F`) with accessibility checks.
+- Local-first data persistence and export bundles (`report.html`, `run.json`, `diff.json`, `policy_results.json`).
+
+## 5-Minute Quickstart
 
 ```bash
 make setup
-```
-
-### 2) Start app
-
-```bash
 make dev
 ```
 
-Open: [http://localhost:3000](http://localhost:3000)
+Open [http://localhost:3000](http://localhost:3000).
 
-### 3) Seed demo traces
+Seed demo runs:
 
 ```bash
 make demo
 ```
 
-Then open `/runs` or click **Try demo trace (30 sec)**.
+## First 3-Minute Walkthrough
 
-## Quality gates
+1. Open landing page and click **Try demo trace**.
+2. Open run `run_demo_fail` and inspect summary + timeline.
+3. Fork from `pricing.lookup` tool response.
+4. Override output with corrected payload from [Demo Script](docs/DEMO_SCRIPT.md).
+5. Compare parent vs branch and review the divergence + blame panel.
+6. Open Policy Lab and run `examples/policies/block_network.yaml` on both runs.
 
-### Standard gate
+## Local Quality Gates (No Paid CI Required)
 
 ```bash
 make check
 make e2e
 make demo
-```
-
-Optional cross-browser visual matrix:
-
-```bash
 make e2e-matrix
-```
-
-### Pre-release gate (full)
-
-```bash
 make preflight
 ```
 
-This runs:
-- lint + typecheck + unit tests
-- browser e2e flow tests
-- demo seed verification
-- visual regression snapshots
+`make preflight` includes lint, typecheck, unit tests, e2e flows, visual regression, matrix browser pass, perf budget, dependency audit, SAST, secret scan, and production smoke test.
 
-No paid GitHub tooling is required for these gates; they run fully local.
+## Security And Safety Defaults
 
-## Optional dependency audit
+- Trace payloads are treated as untrusted input.
+- CSP and output encoding protections are enabled.
+- No trace content is executed as code.
+- Exports are redacted by default (explicit opt-out required).
+- Re-execution is opt-in with provider configuration and live-tool allowlists.
 
-```bash
-make audit
-```
+## Documentation Map
 
-## Data safety operations
+- [Documentation Hub](docs/README.md)
+- [Product Requirements](docs/PRD.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [Technical Deep Dive](docs/TECHNICAL_DEEP_DIVE.md)
+- [Non-Technical Overview](docs/NON_TECHNICAL_OVERVIEW.md)
+- [Onboarding Guide](docs/ONBOARDING.md)
+- [Screenshot Gallery](docs/SCREENSHOT_GALLERY.md)
+- [Release Checklist](docs/RELEASE_CHECKLIST.md)
+- [Threat Model](docs/THREAT_MODEL.md)
 
-```bash
-make migrate-up
-make migrate-status
-make backup
-make restore BACKUP=/absolute/path/to/.atl/backups/backup-...
-make recover
-```
-
-## Release hardening commands
-
-```bash
-make perf-budget
-make profile-harness
-make benchmark-suite
-make smoke-prod
-make package-release
-```
-
-Artifacts are written under `artifacts/`.
-
-## Project structure
+## Repository Layout
 
 ```text
 apps/web            Next.js app (UI + API routes)
 packages/core       Trace model, parsing, branching, compare, blame, scoring
-packages/policy     YAML policy backend + Rego/WASM support
-packages/sdk        JSONL instrumentation helpers
+packages/policy     YAML policy backend + Rego/WASM path
+packages/sdk        Trace instrumentation helpers
 examples/           Sample traces and policies
-assets/             Architecture and UX diagrams
-docs/               PRD/specs/acceptance/demo script
+docs/               Product, architecture, operations, and release documentation
+assets/             Shared diagrams and illustrations
 ```
 
-## Security notes
+## Contributing
 
-- Traces are treated as untrusted input.
-- No trace payload is executed as code.
-- CSP and hardening headers are set in `apps/web/next.config.ts`.
-- Exports are redacted by default (opt-out is explicit and warned).
-- Re-execution is explicit opt-in and provider-configured.
-- Diagnostics bundle generation is opt-in only (Settings toggle).
-
-## Rego/WASM note
-
-Rego source compilation requires local `opa` and `tar` binaries for source-to-WASM compile paths.
-YAML policies work out of the box.
-
-## Demo script
-
-See [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md).
-
-## Release docs
-
-- [docs/RELEASE_PROCESS.md](docs/RELEASE_PROCESS.md)
-- [docs/VERSIONING.md](docs/VERSIONING.md)
-- [docs/ACCESSIBILITY_AUDIT.md](docs/ACCESSIBILITY_AUDIT.md)
-- [docs/FRONTEND_STYLE_GUIDE.md](docs/FRONTEND_STYLE_GUIDE.md)
-- [docs/FRONTEND_SCORECARD.md](docs/FRONTEND_SCORECARD.md)
-
-## Architecture
-
-<p align="center">
-  <img src="assets/diagrams/architecture.svg" width="860" alt="BranchLab architecture" />
-</p>
-
-Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+Please start with [CONTRIBUTING.md](CONTRIBUTING.md), then follow [docs/ONBOARDING.md](docs/ONBOARDING.md) for local workflows.
 
 ## License
 
