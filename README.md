@@ -12,12 +12,23 @@ Agent Twin Lab: replay, fork, compare, and govern AI agent runs.
 
 BranchLab is a local-first reliability and governance cockpit for AI agents. It turns traces into a "digital twin" so you can inspect exactly what happened, run counterfactual branches, test policy impact, and export evidence-grade reports.
 
+## Status
+
+BranchLab is an independent personal R&D project focused on agent reliability, counterfactual debugging, and governance workflows. It is intentionally presented as a high-quality reference implementation rather than a commercial product.
+
 ## Why BranchLab
 
 - Deterministic replay for root-cause analysis.
 - Counterfactual branching to prove what changed outcomes.
 - Policy simulation before production rollouts.
 - Security-first local workflow with redacted exports by default.
+
+## What It Is Good For
+
+- Debugging why an agent run failed, drifted, or incurred unexpected cost.
+- Demonstrating that one intervention actually changed an outcome.
+- Testing policy changes against real traces before rollout.
+- Producing review-ready artifacts for engineering, product, and governance stakeholders.
 
 ## Product At A Glance
 
@@ -164,3 +175,7 @@ Please start with [CONTRIBUTING.md](CONTRIBUTING.md), then follow [docs/ONBOARDI
 ## License
 
 MIT (see [LICENSE](LICENSE)).
+
+---
+
+Independent project notice: BranchLab is a personal R&D project by Jason Lovell. It is not a commercial product and is not affiliated with, endorsed by, or representing any employer, client, or partner organization.

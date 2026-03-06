@@ -14,8 +14,19 @@ Please report security issues privately and include:
 
 Do not open public issues for unpatched vulnerabilities.
 
+Preferred report contents:
+
+- affected commit or release state
+- trust boundary involved
+- realistic exploit scenario
+- suggested mitigation if known
+
 ## Response Targets
 
 - Initial acknowledgement: within 72 hours
 - Triage update: within 7 days
 - Remediation target: based on severity and exploitability
+
+## Scope Notes
+
+BranchLab is a local-first personal R&D project, but security issues are still treated seriously because the repository handles untrusted trace data and export workflows.
