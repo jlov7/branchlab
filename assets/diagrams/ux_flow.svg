@@ -51,5 +51,5 @@
   <text x="75" y="452" class="btxt">Replay = deterministic</text>
 
   <rect x="250" y="430" width="250" height="34" class="badge"/>
-  <text x="265" y="452" class="btxt">Re-exec = opt-in & labeled</text>
+  <text x="265" y="452" class="btxt">Re-exec = opt-in &amp; labeled</text>
 </svg>

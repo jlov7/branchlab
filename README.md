@@ -74,7 +74,7 @@ flowchart LR
 ```
 
 <p align="center">
-  <img src="assets/diagrams/architecture.svg" width="920" alt="BranchLab architecture illustration" />
+  <img src="assets/diagrams/architecture.png" width="920" alt="BranchLab architecture illustration" />
 </p>
 
 ## User Journey (Import To Decision)

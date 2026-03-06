@@ -62,5 +62,5 @@
   <line x1="520" y1="540" x2="650" y2="540" class="arrow"/>
 
   <!-- caption -->
-  <text x="70" y="690" class="text">Tip: keep replay deterministic; require explicit opt-in for re-execution & live tools.</text>
+  <text x="70" y="690" class="text">Tip: keep replay deterministic; require explicit opt-in for re-execution &amp; live tools.</text>
 </svg>
