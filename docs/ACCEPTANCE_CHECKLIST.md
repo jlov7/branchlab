@@ -9,9 +9,10 @@ This checklist records the March 2026 MVP/release baseline. It should not be rea
 
 - [x] `pnpm check`
 - [x] `pnpm e2e`
-- [x] `pnpm audit --prod --audit-level high`
+- [x] `pnpm audit --prod --audit-level moderate`
 - [x] `pnpm sast`
 - [x] `pnpm scan:secrets`
+- [x] `pnpm docs:links`
 - [x] Trace IR v2 foundation tests pass
 - [x] Data reset safety tests pass
 

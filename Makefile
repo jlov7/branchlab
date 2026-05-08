@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-.PHONY: setup dev check test e2e demo e2e-visual e2e-matrix preflight audit sast secrets sbom licenses metadata package-release smoke-prod migrate-up migrate-down migrate-status backup restore recover perf-budget profile-harness benchmark-suite clean
+.PHONY: setup dev check test e2e demo e2e-visual e2e-matrix preflight audit sast secrets docs-links sbom licenses metadata package-release smoke-prod migrate-up migrate-down migrate-status backup restore recover perf-budget profile-harness benchmark-suite clean
 
 setup:
 	corepack enable || true
@@ -41,6 +41,9 @@ sast:
 
 secrets:
 	pnpm scan:secrets
+
+docs-links:
+	pnpm docs:links
 
 sbom:
 	pnpm sbom

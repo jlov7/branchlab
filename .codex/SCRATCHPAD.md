@@ -1,16 +1,17 @@
 ## Current Task
-Autonomous Karpathy-grade final audit: remove residual dependency advisories, close remaining product/debugger gaps, and refresh trust artifacts.
+Autonomous public-readiness final pass: repo structure, README/docs quality, automated docs-link hygiene, and release gate alignment.
 
 ## Status
-Final hardening slice implemented. Production dependency audit is clean at moderate-or-higher severity, Causal Debugger investigation views are improved, docs are refreshed, and release-style gates are passing.
+Public-readiness final pass implemented and verified. `pnpm preflight` passes end-to-end with the new docs-link gate included.
 
 ## Active Plan
-1. [x] Inspect repo state, existing plans, scripts, TODOs, and dependency posture
-2. [x] Clear moderate production audit advisories
-3. [x] Add durable saved-investigation filtering/views to the Causal Debugger
-4. [x] Add final audit scorecard and refresh docs that mention residual advisories
-5. [x] Run security, quality, E2E, visual, and repo hygiene gates
-6. [ ] Commit and push the completed slice
+1. [x] Inspect repo state, docs hub, README, ignored junk, and existing release scripts
+2. [x] Add Markdown/local asset link checker
+3. [x] Wire docs link gate into package scripts, Makefile, PR template, contributing guide, and preflight
+4. [x] Align dependency audit script with moderate-or-higher public standard
+5. [x] Fix docs hub diagram paths and remove ignored `.DS_Store` files
+6. [x] Run final gates
+7. [ ] Commit and push the completed slice
 
 ## Decisions Made
 - Add a deep `tracePhysics` module on top of existing Trace IR and causal utilities instead of rewriting persistence or UI callers in this slice.

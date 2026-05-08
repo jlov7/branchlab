@@ -171,6 +171,7 @@ pnpm e2e:matrix
 pnpm audit --prod --audit-level moderate
 pnpm sast
 pnpm scan:secrets
+pnpm docs:links
 pnpm --filter @branchlab/web perf:budget
 pnpm --filter @branchlab/web benchmark:suite
 pnpm demo

@@ -59,6 +59,6 @@ Use this page as the canonical map for product, engineering, operations, and rel
 
 ## Visual Assets
 
-- Architecture diagram: `assets/diagrams/architecture.png` (`.svg` source also included)
-- Journey diagram: `assets/diagrams/ux_flow.png` (`.svg` source also included)
-- Product screenshots: `docs/assets/screenshots/*.png`
+- Architecture diagram: `../assets/diagrams/architecture.png` (`.svg` source also included)
+- Journey diagram: `../assets/diagrams/ux_flow.png` (`.svg` source also included)
+- Product screenshots: `assets/screenshots/*.png`

@@ -8,6 +8,7 @@
 
 - [ ] `make check`
 - [ ] `make e2e`
+- [ ] `make docs-links`
 - [ ] `pnpm --filter @branchlab/web build`
 
 ## Docs

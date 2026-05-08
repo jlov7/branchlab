@@ -18,6 +18,7 @@ This is the implementation burn-down for taking BranchLab from the Phase 0 + Tra
 - [x] `F10` Investigation workflow: saved investigations, status-scoped saved views, resolve/reject/reopen lifecycle, span pins, selected-investigation reviewer span notes, and evidence-pack exports.
 - [x] `F11` Import telemetry: structured sync/async import telemetry, recent job ledger, and cockpit cancellation controls.
 - [x] `F12` Dependency posture: clear production dependency audit at moderate-or-higher severity.
+- [x] `F13` Public repo polish: automated docs-link gate, README/PR/contribution gate alignment, and docs hub path cleanup.
 
 ## Definition Of Done
 
@@ -41,3 +42,5 @@ This is the implementation burn-down for taking BranchLab from the Phase 0 + Tra
 - `pnpm --filter @branchlab/web benchmark:suite`: passed.
 - `pnpm demo`: passed.
 - `pnpm smoke:prod`: passed.
+- `pnpm docs:links`: passed with 61 Markdown files checked.
+- `pnpm preflight`: passed on May 8, 2026 with the docs-link gate included.

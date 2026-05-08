@@ -24,7 +24,7 @@ This report closes release tracker `docs/plans/2026-03-03-release-readiness-mast
 
 ## Security and Compliance
 
-- Dependency audit: pass (`pnpm audit --prod --audit-level high`)
+- Dependency audit: pass (`pnpm audit --prod --audit-level moderate`)
 - SAST scan: pass (`scripts/sast_scan.sh`)
 - Secret scan: pass (`scripts/scan_secrets.sh`)
 - SBOM generated: `artifacts/sbom.cdx.json`

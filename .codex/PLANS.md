@@ -64,6 +64,61 @@ Completed the final hardening slice:
 
 ---
 
+# BranchLab Public Repo Final Polish ExecPlan
+
+## Purpose / Big Picture
+
+Make the public repository harder to embarrass: README/docs links should be machine-checked, the documented quality bar should match scripts, and ignored OS junk should not survive local publication passes.
+
+## Progress
+
+- [x] Audit README, docs hub, PR template, contributing guide, ignored files, and release scripts
+- [x] Add `scripts/check_markdown_links.ts`
+- [x] Add `pnpm docs:links` and `make docs-links`
+- [x] Wire docs link checking into `pnpm preflight`
+- [x] Add docs link verification to README, CONTRIBUTING, and PR template
+- [x] Align `audit:deps` with the moderate-or-higher public dependency standard
+- [x] Fix docs hub diagram paths
+- [x] Remove ignored `.DS_Store` files from the working copy
+- [x] Run final gates
+- [ ] Commit and push
+
+## Surprises & Discoveries
+
+- Date: 2026-05-08
+  Discovery: The docs hub described diagram paths as if diagrams lived under `docs/assets`, but diagrams live under root `assets/diagrams`.
+  Impact: Corrected the path text and added an automated link checker so this class of drift is caught.
+- Date: 2026-05-08
+  Discovery: Markdown link extraction must ignore fenced and inline code because documentation includes literal example paths.
+  Impact: The checker strips code before validating links.
+
+## Decision Log
+
+- Date: 2026-05-08
+  Decision: Add a small repo-local TypeScript checker instead of bringing in a new link-check dependency.
+  Rationale: The repo already has `tsx`, and local file/asset checks are enough for the current public-readiness gap.
+
+## Outcomes & Retrospective
+
+Implemented the final public repo polish slice:
+
+- Added a zero-dependency local Markdown/asset link checker.
+- Wired docs link checks into `pnpm preflight`, `make docs-links`, README, CONTRIBUTING, and PR template.
+- Aligned dependency audit scripts and docs on the moderate-or-higher production standard.
+- Fixed the docs hub diagram path text.
+- Removed ignored `.DS_Store` files from the working copy.
+- Full `pnpm preflight` passed with the new gate included.
+
+## Verification Evidence
+
+- `pnpm docs:links`: passed with 61 Markdown files checked.
+- `pnpm audit:deps`: passed with no known vulnerabilities.
+- `pnpm check`: passed.
+- `git diff --check`: passed.
+- `pnpm preflight`: passed end-to-end, including check, E2E, demo seed, visual snapshots, cross-browser visual matrix, 100k perf budget, moderate dependency audit, SAST, secret scan, docs links, and production smoke build.
+
+---
+
 # BranchLab Public-Release ExecPlan
 
 ## Purpose / Big Picture

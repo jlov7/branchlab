@@ -28,6 +28,8 @@ Current weighted estimate: **96.3/100**.
 - [x] Attach new span annotations to the selected investigation instead of the first ledger row.
 - [x] Document investigation APIs and saved investigation schema.
 - [x] Remove stale moderate-advisory caveats from public docs.
+- [x] Add automated Markdown/local asset link checking to the public repo gate.
+- [x] Align README, CONTRIBUTING, PR template, and preflight around the same docs/audit quality bar.
 - [ ] Full hosted OpenAI Responses/Agents re-exec with hosted-tool trace capture, sandbox state, approval semantics, and prompt-caching metadata.
 - [ ] Chunk-level streaming import progress and throughput charts for million-event traces.
 - [ ] Interactive graph layout controls and divergence heatmap inspection beyond the compact deterministic panel.
