@@ -168,7 +168,7 @@ The current local release discipline is intentionally heavy for a local-first to
 pnpm check
 pnpm e2e
 pnpm e2e:matrix
-pnpm audit --prod --audit-level high
+pnpm audit --prod --audit-level moderate
 pnpm sast
 pnpm scan:secrets
 pnpm --filter @branchlab/web perf:budget
@@ -178,8 +178,6 @@ pnpm smoke:prod
 ```
 
 Latest verified status is tracked in [docs/FRONTIER_AUDIT.md](docs/FRONTIER_AUDIT.md), [docs/FRONTIER_BURNDOWN.md](docs/FRONTIER_BURNDOWN.md), and [.codex/PLANS.md](.codex/PLANS.md).
-
-Known current caveat: the high-severity production dependency audit passes, but `pnpm audit` still reports 11 moderate advisories.
 
 ## Documentation
 

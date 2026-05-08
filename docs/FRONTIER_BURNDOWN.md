@@ -15,8 +15,9 @@ This is the implementation burn-down for taking BranchLab from the Phase 0 + Tra
 - [x] `F07` Evidence Pack: redacted HTML, normalized v1 trace, Trace IR v2, causal diff, eval results, policy results, provenance hashes, environment metadata, and executive summary.
 - [x] `F08` Workbench UX: navigation and dense debugger-grade screens for Causality, Eval Lab, Runtime Lab, and Evidence Packs.
 - [x] `F09` Verification: unit tests, E2E smoke for new pages, perf budget, dependency audit, SAST, secret scan.
-- [x] `F10` Investigation workflow: saved investigations, resolve/reject/reopen lifecycle, span pins, reviewer span notes, and evidence-pack exports.
+- [x] `F10` Investigation workflow: saved investigations, status-scoped saved views, resolve/reject/reopen lifecycle, span pins, selected-investigation reviewer span notes, and evidence-pack exports.
 - [x] `F11` Import telemetry: structured sync/async import telemetry, recent job ledger, and cockpit cancellation controls.
+- [x] `F12` Dependency posture: clear production dependency audit at moderate-or-higher severity.
 
 ## Definition Of Done
 
@@ -25,17 +26,17 @@ This is the implementation burn-down for taking BranchLab from the Phase 0 + Tra
 - Every destructive or side-effectful runtime path has an explicit audit record.
 - Exports contain enough provenance to validate what was analyzed without trusting UI state.
 - Reviewer hypotheses and span notes are exported as redacted evidence artifacts.
-- `pnpm check`, `pnpm e2e`, `pnpm audit --prod --audit-level high`, `pnpm sast`, and `pnpm scan:secrets` pass.
+- `pnpm check`, `pnpm e2e`, `pnpm audit --prod --audit-level moderate`, `pnpm sast`, and `pnpm scan:secrets` pass.
 
 ## Verification Evidence
 
 - `pnpm check`: passed on May 8, 2026.
 - `pnpm e2e`: passed on May 8, 2026 with 13 Playwright tests.
 - `pnpm e2e:matrix`: passed on May 8, 2026 across Chromium, Firefox, and WebKit visual snapshots.
-- `pnpm audit --prod --audit-level high`: passed; 11 moderate advisories remain.
+- `pnpm audit --prod --audit-level moderate`: passed with no known vulnerabilities.
 - `pnpm sast`: passed.
 - `pnpm scan:secrets`: passed.
-- `pnpm --filter @branchlab/web perf:budget`: passed at 100k events with ingest `23631.74ms`, compare `0.07ms`, RSS `483MB`.
+- `pnpm --filter @branchlab/web perf:budget`: passed at 100k events with ingest `22972.79ms`, compare `0.08ms`, RSS `460MB`.
 - 1M-event scale run: passed in a throwaway temp root with ingest `280738.28ms`, compare `0.06ms`, RSS `1737MB`.
 - `pnpm --filter @branchlab/web benchmark:suite`: passed.
 - `pnpm demo`: passed.

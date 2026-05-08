@@ -1,29 +1,16 @@
 ## Current Task
-Autonomous frontier burn-down: Trace Physics workflow, span annotations, evidence packs, import telemetry, and causal navigation.
+Autonomous Karpathy-grade final audit: remove residual dependency advisories, close remaining product/debugger gaps, and refresh trust artifacts.
 
 ## Status
-Trace physics kernel, golden corpus, product-service integration, UI exposure, saved investigations, lifecycle updates, span pinning, span annotations, evidence-pack investigation/span-note exports, import telemetry, cancellation controls, and causal annotation navigation complete and verified.
+Final hardening slice implemented. Production dependency audit is clean at moderate-or-higher severity, Causal Debugger investigation views are improved, docs are refreshed, and release-style gates are passing.
 
 ## Active Plan
-1. [x] Write design spec and implementation plan
-2. [x] Add RED tests for trace physics kernel
-3. [x] Implement `analyzeTracePhysics()` / `compareTracePhysics()`
-4. [x] Add golden trace corpus fixtures and disk-backed tests
-5. [x] Wire compare, causal, and evidence services to trace physics
-6. [x] Add web integration tests
-7. [x] Surface trace-physics evidence in Compare, Causality, and Evidence UI
-8. [x] Add saved investigations keyed by evidence hash
-9. [x] Run targeted tests, `pnpm check`, `pnpm e2e`, and `pnpm e2e:matrix`
-10. [x] Add investigation resolve/reject/reopen lifecycle updates
-11. [x] Make causal graph spans selectable investigation pins
-12. [x] Export redacted `investigations.json` and investigation provenance counts in evidence packs
-13. [x] Add durable span annotations linked to runs, optional investigations, and span IDs
-14. [x] Export redacted `span_annotations.json` and span-note provenance counts in evidence packs
-15. [x] Add structured import telemetry to sync and async import results
-16. [x] Surface recent import job telemetry on the home workbench
-17. [x] Add workbench cancel control for active import jobs
-18. [x] Make candidate rows select spans in the Causal Debugger
-19. [x] Add all/selected-span filtering for span annotations
+1. [x] Inspect repo state, existing plans, scripts, TODOs, and dependency posture
+2. [x] Clear moderate production audit advisories
+3. [x] Add durable saved-investigation filtering/views to the Causal Debugger
+4. [x] Add final audit scorecard and refresh docs that mention residual advisories
+5. [x] Run security, quality, E2E, visual, and repo hygiene gates
+6. [ ] Commit and push the completed slice
 
 ## Decisions Made
 - Add a deep `tracePhysics` module on top of existing Trace IR and causal utilities instead of rewriting persistence or UI callers in this slice.
@@ -37,6 +24,8 @@ Trace physics kernel, golden corpus, product-service integration, UI exposure, s
 - Use persisted async job `result_json` as the import telemetry artifact instead of adding a redundant table.
 - Reuse the existing job cancellation API in the cockpit rather than adding a second import-specific cancel endpoint.
 - Use keyboard-accessible candidate rows to focus causal spans instead of adding separate tiny row controls.
+- Use narrow `pnpm` overrides for vulnerable transitive packages instead of a broad toolchain upgrade in this hardening slice.
+- Attach new causal span notes to the explicitly selected investigation, not the first investigation in the payload.
 
 ## Open Questions
-- Next Karpathy move: add richer causal graph manipulation, annotation edit history, and saved investigation views.
+- Whether the remaining OpenAI hosted re-exec/sandbox roadmap should be a separate explicit milestone after this repo-hardening slice.

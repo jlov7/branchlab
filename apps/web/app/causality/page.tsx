@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Badge, Button, Card, Field, Input, Page } from "@/components/ui";
 
 interface CausalPayload {
@@ -48,6 +48,8 @@ interface CausalPayload {
   };
 }
 
+type InvestigationStatusFilter = "all" | "open" | "resolved" | "rejected";
+
 export default function CausalityPage() {
   const [runId, setRunId] = useState("run_demo_fail");
   const [branchRunId, setBranchRunId] = useState("");
@@ -62,6 +64,8 @@ export default function CausalityPage() {
   const [annotationTags, setAnnotationTags] = useState("causal, review");
   const [annotationMessage, setAnnotationMessage] = useState("");
   const [annotationFilter, setAnnotationFilter] = useState<"all" | "selected">("all");
+  const [investigationStatusFilter, setInvestigationStatusFilter] = useState<InvestigationStatusFilter>("all");
+  const [selectedInvestigationId, setSelectedInvestigationId] = useState("");
 
   const load = useCallback(async (): Promise<void> => {
     setLoading(true);
@@ -135,7 +139,7 @@ export default function CausalityPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         runId,
-        investigationId: payload?.investigations?.[0]?.id,
+        investigationId: selectedInvestigation?.id,
         spanId: selectedSpanId,
         note: annotationNote,
         tags: annotationTags
@@ -155,6 +159,25 @@ export default function CausalityPage() {
   }, [load]);
 
   const annotations = payload?.annotations ?? [];
+  const investigations = useMemo(() => payload?.investigations ?? [], [payload?.investigations]);
+  const visibleInvestigations = useMemo(
+    () =>
+      investigationStatusFilter === "all"
+        ? investigations
+        : investigations.filter((investigation) => investigation.status === investigationStatusFilter),
+    [investigationStatusFilter, investigations],
+  );
+  const selectedInvestigation =
+    investigations.find((investigation) => investigation.id === selectedInvestigationId) ?? visibleInvestigations[0] ?? null;
+  const investigationCounts = useMemo(
+    () => ({
+      all: investigations.length,
+      open: investigations.filter((investigation) => investigation.status === "open").length,
+      resolved: investigations.filter((investigation) => investigation.status === "resolved").length,
+      rejected: investigations.filter((investigation) => investigation.status === "rejected").length,
+    }),
+    [investigations],
+  );
   const visibleAnnotations =
     annotationFilter === "selected" && selectedSpanId
       ? annotations.filter((annotation) => annotation.spanId === selectedSpanId)
@@ -340,7 +363,7 @@ export default function CausalityPage() {
             <p className="eyebrow">Investigation Ledger</p>
             <h2 style={{ margin: 0 }}>Saved hypotheses</h2>
           </div>
-          <Badge>{payload?.investigations?.length ?? 0} saved</Badge>
+          <Badge>{investigations.length} saved</Badge>
         </div>
         <div className="ui-grid ui-grid-cols-2">
           <Field label="Investigation title">
@@ -350,6 +373,52 @@ export default function CausalityPage() {
             <Input value={hypothesis} onChange={(event) => setHypothesis(event.target.value)} />
           </Field>
         </div>
+        <div className="panel-inset" style={{ marginTop: 14 }}>
+          <div className="panel-header">
+            <div>
+              <p className="eyebrow">Saved Views</p>
+              <h3 style={{ margin: 0 }}>Investigation filters</h3>
+            </div>
+            <Badge>{visibleInvestigations.length} visible</Badge>
+          </div>
+          <div className="ui-inline" style={{ marginTop: 12 }}>
+            {(["all", "open", "resolved", "rejected"] as const).map((status) => (
+              <Button
+                key={status}
+                variant={investigationStatusFilter === status ? "primary" : "ghost"}
+                aria-pressed={investigationStatusFilter === status}
+                onClick={() => {
+                  setInvestigationStatusFilter(status);
+                  setSelectedInvestigationId("");
+                }}
+              >
+                {status} {investigationCounts[status]}
+              </Button>
+            ))}
+          </div>
+          <div className="panel-inset" style={{ marginTop: 12 }}>
+            <span className="subtle">Selected investigation </span>
+            <span className="mono">{selectedInvestigation?.title ?? "none"}</span>
+            {selectedInvestigation ? (
+              <div className="ui-inline" style={{ marginTop: 10 }}>
+                <Button
+                  onClick={() => {
+                    setInvestigationTitle(selectedInvestigation.title);
+                    setHypothesis(selectedInvestigation.hypothesis);
+                  }}
+                >
+                  Load text
+                </Button>
+                <Button
+                  onClick={() => setSelectedSpanId(selectedInvestigation.pinnedSpanIds[0] ?? "")}
+                  disabled={selectedInvestigation.pinnedSpanIds.length === 0}
+                >
+                  Use first pin
+                </Button>
+              </div>
+            ) : null}
+          </div>
+        </div>
         <div className="ui-inline" style={{ marginTop: 12 }}>
           <Button onClick={() => void saveInvestigation()} disabled={!payload?.tracePhysics?.evidence.evidenceHash}>
             Save investigation
@@ -357,7 +426,7 @@ export default function CausalityPage() {
           {investigationMessage ? <span className="subtle">{investigationMessage}</span> : null}
         </div>
         <div className="record-table" style={{ marginTop: 14 }}>
-          {(payload?.investigations ?? []).map((investigation) => (
+          {visibleInvestigations.map((investigation) => (
             <div key={investigation.id} className="record-row">
               <span>{investigation.title}</span>
               <Badge tone={investigation.status === "resolved" ? "success" : investigation.status === "rejected" ? "danger" : "warning"}>
@@ -367,6 +436,13 @@ export default function CausalityPage() {
               <span className="mono subtle">{investigation.evidenceHash.slice(0, 12)}</span>
               <span className="mono subtle">{investigation.pinnedSpanIds.join(", ") || "no pins"}</span>
               <span className="ui-inline">
+                <Button
+                  aria-label={`Select investigation ${investigation.title}`}
+                  variant={selectedInvestigation?.id === investigation.id ? "primary" : "ghost"}
+                  onClick={() => setSelectedInvestigationId(investigation.id)}
+                >
+                  Select
+                </Button>
                 <Button
                   aria-label={`Resolve ${investigation.title}`}
                   onClick={() => void updateInvestigationStatus(investigation.id, "resolved")}
@@ -390,8 +466,10 @@ export default function CausalityPage() {
               </span>
             </div>
           ))}
-          {(payload?.investigations ?? []).length === 0 ? (
-            <div className="empty-table">No saved investigations yet.</div>
+          {visibleInvestigations.length === 0 ? (
+            <div className="empty-table">
+              {investigations.length === 0 ? "No saved investigations yet." : "No investigations match this saved view."}
+            </div>
           ) : null}
         </div>
         <div className="panel-inset" style={{ marginTop: 14 }}>

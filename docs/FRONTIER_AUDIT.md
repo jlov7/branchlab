@@ -32,20 +32,20 @@ The March 2026 release artifacts remain useful historical evidence, but they are
 - Added Evidence Pack exports with redacted HTML, normalized trace, Trace IR v2, causal diff, eval results, policy results, provenance, and environment metadata.
 - Added dense workbench pages for Causality, Eval Lab, Runtime, and Evidence Packs.
 - Optimized large-run persistence with cached/sharded blob writes and Trace IR fingerprint fast-path compare.
-- Added saved investigations, span-level reviewer annotations, evidence-pack investigation/span-note artifacts, import telemetry, and cockpit import cancellation controls.
+- Added saved investigations, status-scoped investigation views, selected-investigation span notes, span-level reviewer annotations, evidence-pack investigation/span-note artifacts, import telemetry, and cockpit import cancellation controls.
+- Cleared all known production dependency audit advisories at moderate-or-higher severity with pinned transitive overrides for `dompurify`, `postcss`, and `yaml`.
 
 ## Current Residual Risks
 
 - Re-execution still uses the existing lightweight provider adapter path, not a full hosted OpenAI Responses/Agents runtime with hosted-tool traces, sandbox state, and approval semantics.
 - Next 16, React, Vitest, Playwright, and other larger dependency upgrades remain separate compatibility work.
-- `pnpm audit --prod --audit-level high` passes, but 11 moderate dependency advisories remain.
 - The 1M-event scale gate passed with a temporary local data root; import telemetry is now visible, but chunk-level streaming progress and throughput charts remain future work.
 
 ## Required Gate For This Slice
 
 - [x] `pnpm check`
 - [x] `pnpm e2e`
-- [x] `pnpm audit --prod --audit-level high`
+- [x] `pnpm audit --prod --audit-level moderate`
 - [x] `pnpm sast`
 - [x] `pnpm scan:secrets`
 - [x] `pnpm --filter @branchlab/web perf:budget`
@@ -55,7 +55,7 @@ The March 2026 release artifacts remain useful historical evidence, but they are
 - [x] `pnpm smoke:prod`
 
 Gate notes:
-- `pnpm audit --prod --audit-level high` exits cleanly; 11 moderate advisories remain.
+- `pnpm audit --prod --audit-level moderate` exits cleanly with no known vulnerabilities.
 - E2E ran with an isolated data root (`playwright:dataRoot=/tmp/branchlab-e2e-*`).
-- 100k-event perf budget passed with ingest `23631.74ms`, compare `0.07ms`, RSS `483MB`.
+- 100k-event perf budget passed with ingest `22972.79ms`, compare `0.08ms`, RSS `460MB`.
 - 1M-event scale gate passed in a throwaway temp root with ingest `280738.28ms`, compare `0.06ms`, RSS `1737MB`.

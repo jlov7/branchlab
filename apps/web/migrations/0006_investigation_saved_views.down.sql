@@ -1,0 +1,1 @@
+DROP INDEX IF EXISTS idx_saved_investigations_status_updated;

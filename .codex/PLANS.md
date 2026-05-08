@@ -1,3 +1,69 @@
+# BranchLab Karpathy-Grade Final Hardening ExecPlan
+
+## Purpose / Big Picture
+
+Run one more critical repo pass after the frontier/frontend/video work and close any concrete gap that would undermine a world-class engineering review. This slice prioritizes measurable trust: dependency posture, investigation workflow honesty, public docs, and verification evidence.
+
+## Progress
+
+- [x] Inspect repo state, previous ExecPlans, TODOs, build artifacts, package scripts, and dependency audit posture
+- [x] Clear production dependency advisories at moderate-or-higher severity
+- [x] Add status-scoped saved investigation views to the Causal Debugger
+- [x] Attach span annotations to the selected investigation instead of the first saved investigation
+- [x] Document saved investigation API/schema and refresh public audit caveats
+- [x] Add final Karpathy-grade audit scorecard and residual burn-down
+- [x] Run targeted browser flow, full quality/security gates, visual matrix, and repo hygiene checks
+- [ ] Commit and push the completed hardening slice
+
+## Surprises & Discoveries
+
+- Date: 2026-05-08
+  Discovery: The only concrete dependency gap was no longer high severity; it was 11 moderate advisories in transitive `yaml`, `dompurify`, and `postcss`.
+  Impact: Added narrow pnpm overrides and direct YAML update rather than a risky broad framework upgrade.
+- Date: 2026-05-08
+  Discovery: Causal Debugger span annotations were associated with the first investigation in the payload rather than the investigator-selected row.
+  Impact: Added explicit saved investigation selection and tied new span notes to that selected investigation.
+
+## Decision Log
+
+- Date: 2026-05-08
+  Decision: Keep this pass scoped to high-confidence fixes instead of starting the full hosted OpenAI Responses/Agents runtime now.
+  Rationale: Dependency posture and investigation workflow correctness are immediate repo-quality gaps; hosted re-exec is a separate architecture milestone that needs its own design and regression matrix.
+- Date: 2026-05-08
+  Decision: Use pnpm overrides for vulnerable transitives.
+  Rationale: The vulnerable packages are below Next/Monaco/OPA boundaries, and the patched versions satisfy the existing API surface under the current tests.
+
+## Outcomes & Retrospective
+
+Completed the final hardening slice:
+
+- Production dependency audit now passes at moderate-or-higher severity.
+- Causal Debugger saved investigations now have status-scoped views, explicit selection, and reusable pins.
+- Span notes now attach to the selected investigation.
+- Public docs no longer carry stale moderate-advisory caveats and now include a final audit scorecard.
+- Full repo gates passed; only commit/push remains.
+
+## Verification Evidence
+
+- `pnpm audit --prod --audit-level moderate`: passed with no known vulnerabilities after dependency updates.
+- `pnpm --filter @branchlab/web typecheck`: passed.
+- `pnpm --filter @branchlab/policy test`: passed.
+- `pnpm --filter @branchlab/web test -- investigationService.test.ts spanAnnotationService.test.ts`: passed.
+- `pnpm --filter @branchlab/web exec tsx scripts/run_playwright.ts tests/e2e/frontier-workbench.spec.ts --reporter=line`: failed once on strict selectors, then passed after selector hardening.
+- `pnpm exec turbo lint typecheck test --force`: passed with 12 successful tasks and 0 cached.
+- `pnpm e2e`: passed with 13 Playwright tests.
+- `pnpm e2e:matrix`: passed with 9 cross-browser visual tests.
+- `pnpm sast`: passed.
+- `pnpm scan:secrets`: passed.
+- `impeccable detect --fast --json apps/web`: passed with `[]`.
+- `pnpm demo`: passed.
+- `pnpm smoke:prod`: passed.
+- `pnpm perf:budget`: failed once while running concurrently with production build, then passed alone with 100k events, ingest `22972.79ms`, compare `0.08ms`, RSS `460MB`.
+- `pnpm --filter @branchlab/web benchmark:suite`: passed.
+- `git diff --check`: passed.
+
+---
+
 # BranchLab Public-Release ExecPlan
 
 ## Purpose / Big Picture
@@ -158,7 +224,7 @@ Success for the current implementation slice means Phase 0 is stable again, stal
 
 - Completed: Phase 0 stabilization, lint migration, high-severity audit fix, data reset safety, isolated script/test data roots, Trace IR v2 foundation, SDK Trace IR/OTel emitters, Trace IR persistence/fingerprints, causal debugger, Eval Lab, Policy Lab v2 checks, Runtime Lab records, Evidence Pack exports, Frontier workbench navigation, scale/perf hardening, and living frontier audit docs.
 - Deferred: major Next 16/toolchain upgrade and full hosted OpenAI Responses/Agents re-execution with sandbox state, hosted-tool traces, and approval semantics.
-- Risks left: 11 moderate dependency advisories remain; million-event imports pass the scale gate but should expose richer progress telemetry for interactive UX.
+- Risks left: moderate dependency advisories were resolved by the later final hardening pass; million-event imports pass the scale gate but should expose richer progress telemetry for interactive UX.
 - Follow-ups: deepen provider-specific re-exec around the canonical Trace IR rather than bypassing it.
 
 ## Verification Evidence
@@ -166,7 +232,7 @@ Success for the current implementation slice means Phase 0 is stable again, stal
 - Commands run before implementation: `pnpm check`, `pnpm e2e`, `pnpm audit --prod --audit-level high`.
 - `pnpm check`: passed on 2026-05-07.
 - `pnpm e2e`: passed on 2026-05-07, 12 Playwright tests, isolated `/tmp/branchlab-e2e-*` data root.
-- `pnpm audit --prod --audit-level high`: passed on 2026-05-07; 11 moderate advisories remain.
+- `pnpm audit --prod --audit-level high`: passed on 2026-05-07; moderate advisories at that time were resolved by the later final hardening pass.
 - `pnpm sast`: passed on 2026-05-07.
 - `pnpm scan:secrets`: passed on 2026-05-07.
 - `pnpm --filter @branchlab/web perf:budget`: passed on 2026-05-07 with 100k events, ingest 24136.15ms, compare 4592.01ms.
@@ -174,7 +240,7 @@ Success for the current implementation slice means Phase 0 is stable again, stal
 - `pnpm check`: passed on 2026-05-08.
 - `pnpm e2e`: passed on 2026-05-08, 13 Playwright tests.
 - `pnpm e2e:matrix`: passed on 2026-05-08 across Chromium, Firefox, and WebKit.
-- `pnpm audit --prod --audit-level high`: passed on 2026-05-08; 11 moderate advisories remain.
+- `pnpm audit --prod --audit-level high`: passed on 2026-05-08; moderate advisories at that time were resolved by the later final hardening pass.
 - `pnpm sast`: passed on 2026-05-08.
 - `pnpm scan:secrets`: passed on 2026-05-08.
 - `pnpm --filter @branchlab/web perf:budget`: passed on 2026-05-08 with 100k events, ingest 23631.74ms, compare 0.07ms.
@@ -454,7 +520,7 @@ Make large-trace imports inspectable after the fact. Async imports already exist
 - `pnpm check`: passed again after adding the cancellation control.
 - `pnpm e2e`: passed again, 13 Playwright tests.
 - `pnpm e2e:matrix`: passed again, 9 cross-browser visual tests.
-- `pnpm audit --prod --audit-level high`: passed with 11 known moderate advisories.
+- `pnpm audit --prod --audit-level high`: passed at the time; moderate advisories were resolved by the later final hardening pass.
 - `pnpm sast`: passed.
 - `pnpm scan:secrets`: passed.
 - `git diff --check`: passed.

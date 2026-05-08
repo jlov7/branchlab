@@ -70,6 +70,32 @@ Base path: `/api`
   - `investigationId?: string`
 - Response `200`: `{ annotation: SpanAnnotation }`
 
+## `GET /investigations`
+
+- Query: `runId?: string`
+- Response `200`: `{ investigations: SavedInvestigation[] }`
+
+## `POST /investigations`
+
+- Request:
+  - `runId: string`
+  - `branchRunId?: string`
+  - `title: string`
+  - `hypothesis: string`
+  - `pinnedSpanIds?: string[]`
+  - `evidenceHash: string`
+- Response `200`: `{ investigation: SavedInvestigation }`
+
+## `PATCH /investigations`
+
+- Request:
+  - `id: string`
+  - `title?: string`
+  - `hypothesis?: string`
+  - `pinnedSpanIds?: string[]`
+  - `status?: open|resolved|rejected`
+- Response `200`: `{ investigation: SavedInvestigation }`
+
 ## `POST /branches`
 
 - Request:

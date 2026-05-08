@@ -39,5 +39,12 @@
     "turbo": "^2.5.6",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4"
+  },
+  "pnpm": {
+    "overrides": {
+      "@open-policy-agent/opa-wasm>yaml": "1.10.3",
+      "monaco-editor>dompurify": "3.4.0",
+      "next>postcss": "8.5.10"
+    }
   }
 }

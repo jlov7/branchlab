@@ -140,6 +140,24 @@ Indexes:
 - `(run_id, span_id)`
 - `(investigation_id)`
 
+## Saved investigations
+`saved_investigations`
+- `id` TEXT PRIMARY KEY
+- `run_id` TEXT
+- `branch_run_id` TEXT NULL
+- `title` TEXT
+- `hypothesis` TEXT
+- `pinned_span_ids_json` TEXT
+- `evidence_hash` TEXT
+- `status` TEXT (`open` | `resolved` | `rejected`)
+- `created_at` TEXT
+- `updated_at` TEXT
+
+Indexes:
+- `(run_id, updated_at)`
+- `(evidence_hash)`
+- `(status, updated_at)`
+
 ## Jobs
 `jobs`
 - `id` TEXT PRIMARY KEY
