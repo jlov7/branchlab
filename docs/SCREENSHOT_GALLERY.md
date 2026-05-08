@@ -2,6 +2,12 @@
 
 Screenshots are generated from the deterministic visual regression suite so the README and docs reflect the current verified UI.
 
+## Overview Video
+
+[Watch the 90-second BranchLab overview](assets/videos/branchlab-overview.mp4).
+
+[![BranchLab overview video poster](assets/videos/branchlab-overview-poster.png)](assets/videos/branchlab-overview.mp4)
+
 ## Workbench
 
 ![BranchLab landing screen](assets/screenshots/landing.png)

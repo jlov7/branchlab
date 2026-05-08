@@ -1,0 +1,646 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <link rel="icon" href="data:," />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #050507;
+        color: #f1eee8;
+        font-family: "Space Grotesk", Inter, ui-sans-serif, system-ui, sans-serif;
+      }
+
+      #root {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background:
+          linear-gradient(rgba(52, 49, 45, 0.18) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(52, 49, 45, 0.18) 1px, transparent 1px),
+          radial-gradient(circle at 76% 14%, rgba(0, 217, 146, 0.13), transparent 28%),
+          radial-gradient(circle at 12% 82%, rgba(243, 179, 76, 0.09), transparent 26%),
+          #050507;
+        background-size: 40px 40px, 40px 40px, auto, auto, auto;
+      }
+
+      .scene {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 44px;
+        width: 100%;
+        height: 100%;
+        padding: 84px 112px;
+        visibility: hidden;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .scene.split {
+        display: grid;
+        grid-template-columns: 0.9fr 1.25fr;
+        align-items: center;
+        gap: 56px;
+      }
+
+      .scene.center {
+        align-items: center;
+        text-align: center;
+      }
+
+      .eyebrow {
+        color: #00d992;
+        font-family: "IBM Plex Mono", "JetBrains Mono", monospace;
+        font-size: 22px;
+        letter-spacing: 0.11em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        max-width: 1320px;
+        font-size: 118px;
+        line-height: 0.94;
+        letter-spacing: -0.02em;
+      }
+
+      h2 {
+        max-width: 1020px;
+        font-size: 76px;
+        line-height: 0.98;
+      }
+
+      h3 {
+        font-size: 34px;
+        line-height: 1.05;
+      }
+
+      p {
+        max-width: 980px;
+        color: #b7b0a6;
+        font-size: 36px;
+        line-height: 1.28;
+      }
+
+      .mono {
+        font-family: "IBM Plex Mono", "JetBrains Mono", monospace;
+      }
+
+      .panel {
+        border: 1px solid #34312d;
+        border-radius: 8px;
+        background: rgba(17, 17, 16, 0.88);
+        box-shadow: 0 26px 90px rgba(0, 0, 0, 0.34);
+      }
+
+      .micro-panel {
+        display: grid;
+        gap: 20px;
+        padding: 28px;
+        border: 1px solid #34312d;
+        border-radius: 8px;
+        background: rgba(12, 12, 11, 0.92);
+      }
+
+      .chip-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        min-height: 42px;
+        padding: 8px 14px;
+        border: 1px solid #4a4540;
+        border-radius: 999px;
+        color: #f1eee8;
+        background: rgba(17, 17, 16, 0.9);
+        font-family: "IBM Plex Mono", "JetBrains Mono", monospace;
+        font-size: 18px;
+      }
+
+      .chip.signal {
+        border-color: rgba(0, 217, 146, 0.72);
+        color: #00d992;
+      }
+
+      .chip.warn {
+        border-color: rgba(243, 179, 76, 0.72);
+        color: #f3b34c;
+      }
+
+      .chip.danger {
+        border-color: rgba(255, 95, 98, 0.72);
+        color: #ff5f62;
+      }
+
+      .brand {
+        position: absolute;
+        top: 42px;
+        left: 56px;
+        z-index: 20;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        color: #f1eee8;
+        font-size: 22px;
+        font-weight: 700;
+      }
+
+      .brand-mark {
+        display: grid;
+        place-items: center;
+        width: 42px;
+        height: 42px;
+        border: 1px solid rgba(0, 217, 146, 0.64);
+        border-radius: 8px;
+        color: #00d992;
+        font-family: "IBM Plex Mono", "JetBrains Mono", monospace;
+      }
+
+      .timecode {
+        position: absolute;
+        top: 48px;
+        right: 64px;
+        z-index: 20;
+        color: #958e84;
+        font-family: "IBM Plex Mono", "JetBrains Mono", monospace;
+        font-size: 18px;
+      }
+
+      .footerline {
+        position: absolute;
+        left: 112px;
+        right: 112px;
+        bottom: 62px;
+        z-index: 25;
+        display: flex;
+        justify-content: space-between;
+        gap: 24px;
+        border-top: 1px solid #34312d;
+        padding-top: 20px;
+        color: #b7b0a6;
+        font-family: "IBM Plex Mono", "JetBrains Mono", monospace;
+        font-size: 22px;
+      }
+
+      .footerline strong {
+        color: #f1eee8;
+      }
+
+      .problem-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 18px;
+        width: 100%;
+      }
+
+      .problem-card {
+        min-height: 210px;
+        padding: 26px;
+        border: 1px solid #34312d;
+        border-radius: 8px;
+        background: rgba(17, 17, 16, 0.92);
+      }
+
+      .problem-card span {
+        display: block;
+        margin-bottom: 24px;
+        color: #ff5f62;
+        font-family: "IBM Plex Mono", "JetBrains Mono", monospace;
+        font-size: 18px;
+      }
+
+      .problem-card strong {
+        display: block;
+        font-size: 30px;
+        line-height: 1.05;
+      }
+
+      .screenshot-frame {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid #4a4540;
+        border-radius: 8px;
+        background: #0c0c0b;
+      }
+
+      .screenshot-frame img {
+        display: block;
+        width: 100%;
+      }
+
+      .screenshot-frame.hero {
+        height: 720px;
+      }
+
+      .screenshot-frame.hero img {
+        transform-origin: top left;
+      }
+
+      .callout {
+        position: absolute;
+        z-index: 5;
+        min-width: 320px;
+        padding: 18px 20px;
+        border: 1px solid rgba(0, 217, 146, 0.58);
+        border-radius: 8px;
+        background: rgba(5, 5, 7, 0.92);
+        color: #f1eee8;
+        font-family: "IBM Plex Mono", "JetBrains Mono", monospace;
+        font-size: 18px;
+      }
+
+      .callout.warn {
+        border-color: rgba(243, 179, 76, 0.68);
+      }
+
+      .flow {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 14px;
+        width: 100%;
+      }
+
+      .flow-step {
+        min-height: 172px;
+        padding: 22px;
+        border: 1px solid #34312d;
+        border-radius: 8px;
+        background: rgba(17, 17, 16, 0.9);
+      }
+
+      .flow-step span {
+        display: block;
+        margin-bottom: 24px;
+        color: #958e84;
+        font-family: "IBM Plex Mono", "JetBrains Mono", monospace;
+        font-size: 16px;
+      }
+
+      .flow-step strong {
+        display: block;
+        font-size: 26px;
+        line-height: 1.05;
+      }
+
+      .trace-table {
+        display: grid;
+        grid-template-columns: 1fr;
+        overflow: hidden;
+        border: 1px solid #34312d;
+        border-radius: 8px;
+        background: rgba(12, 12, 11, 0.92);
+      }
+
+      .trace-row {
+        display: grid;
+        grid-template-columns: 110px 260px 1fr 180px;
+        gap: 20px;
+        padding: 18px 22px;
+        border-bottom: 1px solid #34312d;
+        font-family: "IBM Plex Mono", "JetBrains Mono", monospace;
+        font-size: 20px;
+      }
+
+      .trace-row:last-child {
+        border-bottom: 0;
+      }
+
+      .trace-row span {
+        color: #958e84;
+      }
+
+      .trace-row strong {
+        color: #f1eee8;
+      }
+
+      .hash {
+        color: #00d992;
+      }
+
+      .graph {
+        position: relative;
+        height: 560px;
+        border: 1px solid #34312d;
+        border-radius: 8px;
+        background:
+          linear-gradient(rgba(52, 49, 45, 0.2) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(52, 49, 45, 0.2) 1px, transparent 1px),
+          rgba(12, 12, 11, 0.82);
+        background-size: 36px 36px;
+      }
+
+      .node {
+        position: absolute;
+        display: grid;
+        gap: 8px;
+        width: 218px;
+        padding: 16px;
+        border: 1px solid #4a4540;
+        border-radius: 8px;
+        background: rgba(17, 17, 16, 0.96);
+        font-family: "IBM Plex Mono", "JetBrains Mono", monospace;
+        font-size: 17px;
+      }
+
+      .node.active {
+        border-color: rgba(0, 217, 146, 0.78);
+        box-shadow: inset 3px 0 0 #00d992;
+      }
+
+      .edge {
+        position: absolute;
+        height: 2px;
+        transform-origin: left center;
+        background: rgba(0, 217, 146, 0.42);
+      }
+
+      .evidence-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+      }
+
+      .artifact {
+        min-height: 146px;
+        padding: 22px;
+        border: 1px solid #34312d;
+        border-radius: 8px;
+        background: rgba(17, 17, 16, 0.9);
+      }
+
+      .artifact span {
+        display: block;
+        margin-bottom: 18px;
+        color: #958e84;
+        font-family: "IBM Plex Mono", "JetBrains Mono", monospace;
+        font-size: 16px;
+      }
+
+      .artifact strong {
+        font-size: 24px;
+      }
+
+      .final-lockup {
+        display: grid;
+        gap: 28px;
+        justify-items: center;
+      }
+
+      .final-title {
+        max-width: 1280px;
+        font-size: 104px;
+        line-height: 0.96;
+      }
+
+      .signal-line {
+        width: 920px;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #00d992, transparent);
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="92"
+      data-width="1920"
+      data-height="1080"
+    >
+      <div class="brand">
+        <div class="brand-mark">△</div>
+        <div>
+          <div>BranchLab</div>
+          <div class="mono" style="color: #958e84; font-size: 14px; font-weight: 500">agent reliability lab</div>
+        </div>
+      </div>
+      <div class="timecode">local / deterministic / evidence-first</div>
+
+      <section id="s1" class="scene center">
+        <div class="eyebrow">Agent systems need evidence</div>
+        <h1>When an agent fails, logs rarely tell you why.</h1>
+        <p>BranchLab turns traces into replayable proof: spans, hashes, branches, evals, policies, and redacted evidence packs.</p>
+      </section>
+
+      <section id="s2" class="scene">
+        <div>
+          <div class="eyebrow">The failure mode</div>
+          <h2>One final answer. Too many hidden causes.</h2>
+        </div>
+        <div class="problem-grid">
+          <div class="problem-card"><span>01</span><strong>Tool output changed</strong></div>
+          <div class="problem-card"><span>02</span><strong>Policy decision shifted</strong></div>
+          <div class="problem-card"><span>03</span><strong>Prompt branch drifted</strong></div>
+          <div class="problem-card"><span>04</span><strong>No reviewable artifact</strong></div>
+        </div>
+      </section>
+
+      <section id="s3" class="scene split">
+        <div>
+          <div class="eyebrow">The product thesis</div>
+          <h2>No magic without a replayable artifact.</h2>
+          <p>Simple, inspectable trace mathematics at the core. Provider adapters at the edge. Every claim backed by a fingerprint.</p>
+          <div class="chip-row">
+            <span class="chip signal">Trace IR v2</span>
+            <span class="chip">content-addressed blobs</span>
+            <span class="chip warn">redaction state</span>
+          </div>
+        </div>
+        <div class="trace-table">
+          <div class="trace-row"><span>seq</span><span>span</span><span>kind</span><span>hash</span></div>
+          <div class="trace-row"><strong>0001</strong><strong>root</strong><strong>run.start</strong><strong class="hash">d9a81c</strong></div>
+          <div class="trace-row"><strong>0002</strong><strong>llm.plan</strong><strong>llm.response</strong><strong class="hash">8f13aa</strong></div>
+          <div class="trace-row"><strong>0003</strong><strong>tool.price</strong><strong>tool.response</strong><strong class="hash">51ee09</strong></div>
+          <div class="trace-row"><strong>0004</strong><strong>policy.hold</strong><strong>policy.decision</strong><strong class="hash">a39b7c</strong></div>
+        </div>
+      </section>
+
+      <section id="s4" class="scene">
+        <div>
+          <div class="eyebrow">The workflow</div>
+          <h2>Trace to evidence in one local loop.</h2>
+        </div>
+        <div class="flow">
+          <div class="flow-step"><span>01</span><strong>Import trace</strong></div>
+          <div class="flow-step"><span>02</span><strong>Replay timeline</strong></div>
+          <div class="flow-step"><span>03</span><strong>Fork branch</strong></div>
+          <div class="flow-step"><span>04</span><strong>Compare divergence</strong></div>
+          <div class="flow-step"><span>05</span><strong>Run eval + policy</strong></div>
+          <div class="flow-step"><span>06</span><strong>Export evidence</strong></div>
+        </div>
+      </section>
+
+      <section id="s5" class="scene split">
+        <div>
+          <div class="eyebrow">Workbench</div>
+          <h2>The first screen is not marketing. It is live local state.</h2>
+          <p>Runs, failures, event counts, import telemetry, runtime records, and provenance signals sit in the first viewport.</p>
+        </div>
+        <div class="screenshot-frame hero" data-layout-allow-overflow>
+          <img src="assets/screenshots/landing.png" alt="BranchLab workbench screenshot" />
+          <div class="callout" style="top: 82px; right: 60px">Evidence stack is always visible</div>
+          <div class="callout warn" style="left: 64px; bottom: 86px">Large imports show progress + cancel</div>
+        </div>
+      </section>
+
+      <section id="s6" class="scene split">
+        <div>
+          <div class="eyebrow">Run Library</div>
+          <h2>Every run is searchable, annotated, and replayable.</h2>
+          <p>Raw events stay available, but the workbench pushes hashes, tools, tags, status, and trace structure forward.</p>
+        </div>
+        <div class="screenshot-frame hero" data-layout-allow-overflow>
+          <img src="assets/screenshots/runs.png" alt="BranchLab run library screenshot" />
+          <div class="callout" style="top: 150px; left: 70px">Trace library</div>
+          <div class="callout warn" style="right: 74px; bottom: 112px">Local annotations + filters</div>
+        </div>
+      </section>
+
+      <section id="s7" class="scene split">
+        <div>
+          <div class="eyebrow">Compare</div>
+          <h2>Branches are judged by first divergence, not vibes.</h2>
+          <p>Parent and branch traces get replay fingerprints, causal candidates, semantic diffs, and a canonical evidence summary.</p>
+        </div>
+        <div class="screenshot-frame hero" data-layout-allow-overflow>
+          <img src="assets/screenshots/compare.png" alt="BranchLab compare screenshot" />
+          <div class="callout" style="top: 92px; right: 60px">First divergence</div>
+          <div class="callout warn" style="left: 64px; bottom: 92px">Trace physics hash</div>
+        </div>
+      </section>
+
+      <section id="s8" class="scene split">
+        <div>
+          <div class="eyebrow">Causal Debugger</div>
+          <h2>Save the hypothesis. Pin the span. Keep the review trail.</h2>
+          <p>Branch DAGs, selected-span notes, confidence-ranked candidates, and resolved investigations become part of the evidence record.</p>
+        </div>
+        <div class="graph">
+          <div class="edge" style="left: 178px; top: 174px; width: 340px; transform: rotate(15deg)"></div>
+          <div class="edge" style="left: 542px; top: 238px; width: 322px; transform: rotate(-12deg)"></div>
+          <div class="edge" style="left: 328px; top: 388px; width: 390px; transform: rotate(8deg)"></div>
+          <div class="node" style="left: 70px; top: 96px"><span class="hash">root</span><strong>run.start</strong><span>seq 0</span></div>
+          <div class="node active" style="left: 450px; top: 178px"><span class="hash">tool.price</span><strong>tool.response</strong><span>92% candidate</span></div>
+          <div class="node" style="right: 86px; top: 96px"><span class="hash">final</span><strong>llm.response</strong><span>changed</span></div>
+          <div class="node" style="left: 268px; bottom: 84px"><span class="hash">policy</span><strong>policy.decision</strong><span>warning</span></div>
+          <div class="node" style="right: 176px; bottom: 110px"><span class="hash">note</span><strong>reviewer note</strong><span>resolved</span></div>
+        </div>
+      </section>
+
+      <section id="s9" class="scene">
+        <div>
+          <div class="eyebrow">Labs</div>
+          <h2>Reliability is a system, not a single diff.</h2>
+        </div>
+        <div class="evidence-grid">
+          <div class="artifact"><span>Eval Lab</span><strong>Datasets from traces, deterministic rubrics, regression gates.</strong></div>
+          <div class="artifact"><span>Policy Lab</span><strong>PII, secrets, dataflow warnings, tool-risk scoring.</strong></div>
+          <div class="artifact"><span>Runtime Lab</span><strong>Budgets, provider config, allowlists, side-effect audit trails.</strong></div>
+        </div>
+      </section>
+
+      <section id="s10" class="scene">
+        <div>
+          <div class="eyebrow">Evidence Pack</div>
+          <h2>The export is what lets another engineer trust the claim.</h2>
+        </div>
+        <div class="evidence-grid">
+          <div class="artifact"><span>trace_ir.json</span><strong>Canonical spans + hashes</strong></div>
+          <div class="artifact"><span>trace_physics.json</span><strong>Graph, diagnostics, evidence hash</strong></div>
+          <div class="artifact"><span>causal_diff.json</span><strong>First divergence + heatmap</strong></div>
+          <div class="artifact"><span>investigations.json</span><strong>Hypotheses and status</strong></div>
+          <div class="artifact"><span>span_annotations.json</span><strong>Reviewer notes</strong></div>
+          <div class="artifact"><span>provenance.json</span><strong>Fingerprints and metadata</strong></div>
+        </div>
+      </section>
+
+      <section id="s11" class="scene center">
+        <div class="final-lockup">
+          <div class="eyebrow">BranchLab</div>
+          <h1 class="final-title">Replayable evidence for agent reliability.</h1>
+          <div class="signal-line"></div>
+          <p>Local-first. Provider-neutral. Deterministic by default. Built for engineers who need proof.</p>
+          <div class="chip-row">
+            <span class="chip signal">Trace IR v2</span>
+            <span class="chip">Causal Debugger</span>
+            <span class="chip">Eval Lab</span>
+            <span class="chip">Policy Lab</span>
+            <span class="chip warn">Redacted Evidence Packs</span>
+          </div>
+        </div>
+      </section>
+
+      <div class="footerline">
+        <span><strong>BranchLab overview</strong> / local agent reliability lab</span>
+        <span>no magic without a replayable artifact</span>
+      </div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      const scenes = ["#s1", "#s2", "#s3", "#s4", "#s5", "#s6", "#s7", "#s8", "#s9", "#s10", "#s11"];
+      const starts = [0, 8, 16, 25, 33, 42, 51, 60, 69, 77, 85];
+      const durations = [8, 8, 9, 8, 9, 9, 9, 9, 8, 8, 7];
+      const select = (root, selector) => {
+        const rootElement = document.querySelector(root);
+        return rootElement ? Array.from(rootElement.querySelectorAll(selector)) : [];
+      };
+      const fromIfPresent = (root, selector, vars, position) => {
+        const targets = select(root, selector);
+        if (targets.length > 0) {
+          tl.from(targets, vars, position);
+        }
+      };
+
+      scenes.forEach((scene, index) => {
+        const start = starts[index];
+        const duration = durations[index];
+        tl.set(scene, { visibility: "visible", opacity: 1, pointerEvents: "auto" }, start);
+        fromIfPresent(scene, ".eyebrow", { y: 22, opacity: 0, duration: 0.5, ease: "power3.out" }, start + 0.15);
+        fromIfPresent(scene, "h1, h2", { y: 54, opacity: 0, duration: 0.7, ease: "power3.out" }, start + 0.28);
+        fromIfPresent(scene, "p", { y: 30, opacity: 0, duration: 0.55, ease: "power2.out" }, start + 0.62);
+        fromIfPresent(
+          scene,
+          ".problem-card, .flow-step, .artifact, .micro-panel",
+          { y: 36, opacity: 0, duration: 0.55, stagger: 0.07, ease: "power3.out" },
+          start + 0.85,
+        );
+        fromIfPresent(scene, ".trace-row", { x: -42, opacity: 0, duration: 0.45, stagger: 0.08, ease: "power2.out" }, start + 0.8);
+        fromIfPresent(scene, ".screenshot-frame", { scale: 0.96, opacity: 0, duration: 0.8, ease: "power3.out" }, start + 0.55);
+        fromIfPresent(scene, ".callout", { y: 28, opacity: 0, duration: 0.45, stagger: 0.16, ease: "power2.out" }, start + 1.25);
+        fromIfPresent(scene, ".graph", { scale: 0.97, opacity: 0, duration: 0.65, ease: "power3.out" }, start + 0.55);
+        fromIfPresent(scene, ".node", { scale: 0.88, opacity: 0, duration: 0.45, stagger: 0.1, ease: "back.out(1.7)" }, start + 1.0);
+        fromIfPresent(scene, ".edge", { scaleX: 0, opacity: 0, duration: 0.45, stagger: 0.08, ease: "power2.out" }, start + 1.25);
+        tl.to(scene, { y: -28, opacity: 0, duration: 0.55, ease: "power2.in" }, start + duration - 0.55);
+        tl.set(scene, { y: 0, opacity: 0, visibility: "hidden", pointerEvents: "none" }, start + duration);
+      });
+
+      tl.from(".brand", { y: -18, opacity: 0, duration: 0.5, ease: "power2.out" }, 0.2);
+      tl.from(".timecode", { y: -18, opacity: 0, duration: 0.5, ease: "power2.out" }, 0.3);
+      tl.from(".footerline", { y: 30, opacity: 0, duration: 0.5, ease: "power2.out" }, 0.5);
+      tl.to(".brand-mark", { borderColor: "#00d992", duration: 0.5, repeat: 21, yoyo: true, ease: "sine.inOut" }, 0);
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

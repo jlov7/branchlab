@@ -7,6 +7,16 @@ BranchLab is an open-source oriented R&D project for people who need to understa
 It is intentionally not a SaaS dashboard. The design goal is a rigorous local workbench: simple core trace mathematics, explicit adapters at the edge, no magic without an artifact you can replay or export.
 
 <p align="center">
+  <a href="docs/assets/videos/branchlab-overview.mp4">
+    <img src="docs/assets/videos/branchlab-overview-poster.png" alt="Watch the BranchLab overview video" width="100%" />
+  </a>
+</p>
+
+<p align="center">
+  <a href="docs/assets/videos/branchlab-overview.mp4"><strong>Watch the 90-second overview</strong></a>
+</p>
+
+<p align="center">
   <img src="docs/assets/screenshots/landing.png" alt="BranchLab workbench" width="100%" />
 </p>
 
