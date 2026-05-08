@@ -1,12 +1,15 @@
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
-import type { ExportBundleManifest } from "@branchlab/core";
+import { analyzeTracePhysics, type ExportBundleManifest, type TracePhysicsSummary } from "@branchlab/core";
 import { compareRunsById } from "./compareService";
 import { getDb } from "./db";
+import { listEvalRuns } from "./evalService";
 import { writeFileAtomic } from "./fsAtomic";
 import { newId } from "./ids";
+import { listInvestigations } from "./investigationService";
 import { EXPORTS_DIR } from "./paths";
-import { getAllRunEvents, getRun } from "./runsRepo";
+import { getAllRunEvents, getRun, getRunTraceIrEvents, getTraceFingerprint } from "./runsRepo";
+import { listSpanAnnotations } from "./spanAnnotationService";
 
 export interface ExportInput {
   runId: string;
@@ -26,8 +29,56 @@ export function exportBundle(input: ExportInput): ExportBundleManifest {
   }
 
   const runEvents = getAllRunEvents(input.runId);
+  const traceIr = getRunTraceIrEvents(input.runId);
+  const tracePhysics = analyzeTracePhysics(traceIr, { trustExistingHashes: true });
   const maybeCompare = input.branchRunId ? compareRunsById(input.runId, input.branchRunId) : null;
+  const investigations = listInvestigations(input.runId, 100);
+  const spanAnnotations = listSpanAnnotations({ runId: input.runId, limit: 250 });
+  const tracePhysicsArtifact = {
+    run: compactTracePhysics(tracePhysics),
+    compare: maybeCompare?.tracePhysics
+      ? {
+          parent: compactTracePhysics(maybeCompare.tracePhysics.parent),
+          branch: compactTracePhysics(maybeCompare.tracePhysics.branch),
+          firstDivergenceSpanId: maybeCompare.tracePhysics.firstDivergenceSpanId,
+          firstDivergenceSequence: maybeCompare.tracePhysics.firstDivergenceSequence,
+          heatmap: maybeCompare.tracePhysics.heatmap,
+          candidates: maybeCompare.tracePhysics.candidates,
+          diagnostics: maybeCompare.tracePhysics.diagnostics,
+        }
+      : null,
+  };
+  const provenance = {
+    runId: input.runId,
+    branchRunId: input.branchRunId,
+    runFingerprint: getTraceFingerprint(input.runId),
+    branchFingerprint: input.branchRunId ? getTraceFingerprint(input.branchRunId) : null,
+    causalFirstDivergence: maybeCompare?.causal.firstDivergenceSpanId ?? null,
+    tracePhysicsEvidence: tracePhysics.evidence,
+    tracePhysicsDiagnostics: tracePhysics.diagnostics,
+    investigationCount: investigations.length,
+    investigationEvidenceHashes: [...new Set(investigations.map((investigation) => investigation.evidenceHash))].sort(),
+    spanAnnotationCount: spanAnnotations.length,
+    generatedAt: now,
+    redacted: input.redacted,
+    files: [
+      "report.html",
+      "run.json",
+      "trace_ir.json",
+      "trace_physics.json",
+      "investigations.json",
+      "span_annotations.json",
+      "diff.json",
+      "causal_diff.json",
+      "policy_results.json",
+      "eval_results.json",
+      "provenance.json",
+    ],
+  };
   const payload = input.redacted ? redactObject(runEvents) : runEvents;
+  const traceIrPayload = input.redacted ? redactObject(traceIr) : traceIr;
+  const investigationsPayload = input.redacted ? redactObject(investigations) : investigations;
+  const spanAnnotationsPayload = input.redacted ? redactObject(spanAnnotations) : spanAnnotations;
 
   const reportHtml = `<!doctype html>
 <html>
@@ -54,22 +105,47 @@ ${input.redacted ? "" : '<p class="warn">Warning: export is unredacted.</p>'}
   <h2>Files</h2>
   <ul>
     <li><code>run.json</code></li>
+    <li><code>trace_ir.json</code></li>
+    <li><code>trace_physics.json</code></li>
+    <li><code>investigations.json</code></li>
+    <li><code>span_annotations.json</code></li>
     ${input.branchRunId ? "<li><code>diff.json</code></li>" : ""}
+    <li><code>causal_diff.json</code></li>
     <li><code>policy_results.json</code></li>
+    <li><code>eval_results.json</code></li>
+    <li><code>provenance.json</code></li>
   </ul>
+</div>
+<div class="card">
+  <h2>Evidence</h2>
+  <p><strong>Run fingerprint:</strong> <code>${escapeHtml(provenance.runFingerprint?.fingerprint ?? "missing")}</code></p>
+  <p><strong>Trace physics evidence:</strong> <code>${escapeHtml(provenance.tracePhysicsEvidence.evidenceHash)}</code></p>
+  <p><strong>First causal divergence:</strong> ${escapeHtml(provenance.causalFirstDivergence ?? "none")}</p>
+  <p><strong>Saved investigations:</strong> ${provenance.investigationCount}</p>
+  <p><strong>Span annotations:</strong> ${provenance.spanAnnotationCount}</p>
 </div>
 </body>
 </html>`;
 
   writeFileAtomic(join(folder, "report.html"), reportHtml);
   writeFileAtomic(join(folder, "run.json"), JSON.stringify(payload, null, 2));
+  writeFileAtomic(join(folder, "trace_ir.json"), JSON.stringify(traceIrPayload, null, 2));
+  writeFileAtomic(join(folder, "trace_physics.json"), JSON.stringify(tracePhysicsArtifact, null, 2));
+  writeFileAtomic(join(folder, "investigations.json"), JSON.stringify(investigationsPayload, null, 2));
+  writeFileAtomic(join(folder, "span_annotations.json"), JSON.stringify(spanAnnotationsPayload, null, 2));
   writeFileAtomic(
     join(folder, "diff.json"),
     JSON.stringify(maybeCompare?.compare ?? { message: "No branch selected" }, null, 2),
   );
+  writeFileAtomic(
+    join(folder, "causal_diff.json"),
+    JSON.stringify(maybeCompare?.causal ?? { message: "No branch selected" }, null, 2),
+  );
   writeFileAtomic(join(folder, "policy_results.json"), JSON.stringify(getLatestPolicySummaries(input.runId), null, 2));
+  writeFileAtomic(join(folder, "eval_results.json"), JSON.stringify(listEvalRuns().slice(0, 10), null, 2));
+  writeFileAtomic(join(folder, "provenance.json"), JSON.stringify(provenance, null, 2));
 
-  const files = ["report.html", "run.json", "diff.json", "policy_results.json"];
+  const files = provenance.files;
   const manifest: ExportBundleManifest = {
     id,
     runId: input.runId,
@@ -86,8 +162,28 @@ ${input.redacted ? "" : '<p class="warn">Warning: export is unredacted.</p>'}
     VALUES (?, ?, ?, ?, ?, ?)
   `,
   ).run(id, input.runId, input.branchRunId ?? null, folder, input.redacted ? 1 : 0, now);
+  db.prepare(
+    `
+    INSERT INTO evidence_packs (id, run_id, branch_run_id, export_id, provenance_json, created_at)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `,
+  ).run(newId("evidence"), input.runId, input.branchRunId ?? null, id, JSON.stringify(provenance), now);
 
   return manifest;
+}
+
+function compactTracePhysics(summary: TracePhysicsSummary) {
+  return {
+    fingerprint: summary.fingerprint,
+    diagnostics: summary.diagnostics,
+    evidence: summary.evidence,
+    graph: {
+      nodeCount: summary.graph.nodes.length,
+      edgeCount: summary.graph.edges.length,
+      roots: summary.graph.roots,
+      byEventKind: summary.graph.byEventKind,
+    },
+  };
 }
 
 function getLatestPolicySummaries(runId: string) {

@@ -1,0 +1,1 @@
+{"id":"langsmith_tool","trace_id":"langsmith_trace","parent_run_id":"langsmith_parent","run_type":"tool","name":"pricing.lookup","inputs":{"product":"ACME"},"outputs":{"price":100}}

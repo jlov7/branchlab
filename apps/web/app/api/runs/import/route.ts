@@ -20,6 +20,7 @@ export async function POST(request: Request): Promise<Response> {
 
     if (isAsync) {
       const text = await file.text();
+      const startedAt = Date.now();
       const job = createJob("import", {
         fileName: file.name,
         byteLength: text.length,
@@ -29,6 +30,7 @@ export async function POST(request: Request): Promise<Response> {
         ctx.setProgress(10, "Parsing JSONL");
         const parsed = parseJsonlText(text);
         ctx.throwIfCanceled();
+        ctx.setProgress(45, `Parsed ${parsed.events.length} events`);
 
         ctx.setProgress(70, "Persisting run");
         const saved = await withLock("runs:import", async () =>
@@ -48,12 +50,22 @@ export async function POST(request: Request): Promise<Response> {
         }
 
         ctx.setProgress(100, "Import complete");
+        const durationMs = Math.max(0, Date.now() - startedAt);
         return {
           runId: saved.runId,
           insertedEvents: saved.insertedEvents,
           partialParse: parsed.partialParse,
           issues: parsed.issues,
           validationReportId,
+          telemetry: {
+            fileName: file.name,
+            byteLength: text.length,
+            parsedEvents: parsed.events.length,
+            insertedEvents: saved.insertedEvents,
+            issueCount: parsed.issues.length,
+            partialParse: parsed.partialParse,
+            durationMs,
+          },
         };
       });
 
@@ -67,6 +79,7 @@ export async function POST(request: Request): Promise<Response> {
       );
     }
 
+    const startedAt = Date.now();
     const parsed = await parseUploadedJsonl(file);
     const saved = await withLock("runs:import", async () =>
       saveRun({
@@ -89,6 +102,15 @@ export async function POST(request: Request): Promise<Response> {
       partialParse: parsed.partialParse,
       issues: parsed.issues,
       validationReportId,
+      telemetry: {
+        fileName: file.name,
+        byteLength: file.size,
+        parsedEvents: parsed.events.length,
+        insertedEvents: saved.insertedEvents,
+        issueCount: parsed.issues.length,
+        partialParse: parsed.partialParse,
+        durationMs: Math.max(0, Date.now() - startedAt),
+      },
     });
   } catch (error) {
     return serverError("Failed to import trace", error);

@@ -43,11 +43,15 @@ interface Toast {
 }
 
 const links = [
-  { href: "/", label: "Home", icon: Home },
-  { href: "/runs", label: "Runs", icon: ListTree },
-  { href: "/compare", label: "Compare", icon: GitBranchPlus },
-  { href: "/policy", label: "Policy Lab", icon: Scale },
-  { href: "/settings", label: "Settings", icon: Settings },
+  { href: "/", label: "Workbench", icon: Home, group: "Core", meta: "local cockpit" },
+  { href: "/runs", label: "Runs", icon: ListTree, group: "Core", meta: "trace library" },
+  { href: "/causality", label: "Causality", icon: Command, group: "Analysis", meta: "DAG + blame" },
+  { href: "/compare", label: "Compare", icon: GitBranchPlus, group: "Analysis", meta: "first divergence" },
+  { href: "/evals", label: "Eval Lab", icon: FlaskConical, group: "Labs", meta: "regression gates" },
+  { href: "/policy", label: "Policy Lab", icon: Scale, group: "Labs", meta: "impact simulation" },
+  { href: "/runtime", label: "Runtime", icon: Search, group: "Labs", meta: "guarded re-exec" },
+  { href: "/evidence", label: "Evidence", icon: HelpCircle, group: "Export", meta: "redacted packs" },
+  { href: "/settings", label: "Settings", icon: Settings, group: "Export", meta: "local config" },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -191,8 +195,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <aside className={cn("left-rail", mobileOpen && "open")} aria-label="Primary navigation">
         <div className="left-rail-header">
           <div className="brand">
-            <FlaskConical size={19} />
-            <span>BranchLab</span>
+            <span className="brand-mark" aria-hidden="true">
+              <FlaskConical size={17} />
+            </span>
+            <span className="brand-copy">
+              <span className="brand-title">BranchLab</span>
+              <span className="brand-subtitle">agent reliability lab</span>
+            </span>
           </div>
           <Button
             variant="ghost"
@@ -203,24 +212,48 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <X size={16} />
           </Button>
         </div>
-        <nav className="nav-list" aria-label="Primary">
-          {links.map((link) => {
-            const Icon = link.icon;
-            const active = pathname === link.href || pathname.startsWith(`${link.href}/`);
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={cn("nav-item", active && "active")}
-                aria-current={active ? "page" : undefined}
-                onClick={() => setMobileOpen(false)}
-              >
-                <Icon size={16} />
-                <span>{link.label}</span>
-              </Link>
-            );
-          })}
+        <nav aria-label="Primary">
+          {["Core", "Analysis", "Labs", "Export"].map((group) => (
+            <div key={group} className="rail-section">
+              <p className="rail-label">{group}</p>
+              <div className="nav-list">
+                {links
+                  .filter((link) => link.group === group)
+                  .map((link) => {
+                    const Icon = link.icon;
+                    const active = pathname === link.href || pathname.startsWith(`${link.href}/`);
+                    return (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        className={cn("nav-item", active && "active")}
+                        aria-current={active ? "page" : undefined}
+                        onClick={() => setMobileOpen(false)}
+                      >
+                        <Icon size={16} />
+                        <span>
+                          <span>{link.label}</span>
+                          <span className="nav-meta" aria-hidden="true">{link.meta}</span>
+                        </span>
+                      </Link>
+                    );
+                  })}
+              </div>
+            </div>
+          ))}
         </nav>
+        <div className="rail-footer">
+          <div className="app-status">
+            <span className="status-line">
+              <span className="signal-dot" aria-hidden="true" />
+              Trace IR v2 ready
+            </span>
+            <span className="status-line">
+              <span className="signal-dot warning" aria-hidden="true" />
+              Live tools off by default
+            </span>
+          </div>
+        </div>
       </aside>
       {mobileOpen ? (
         <button className="left-rail-scrim" aria-label="Close navigation" onClick={() => setMobileOpen(false)} />
@@ -228,9 +261,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <div className="main-frame">
         <header className="top-bar">
           <div className="top-bar-grid">
-            <div style={{ display: "grid", gap: 6 }}>
-              <p className="top-bar-meta">
-                Replay: deterministic unless re-execution is explicitly enabled.
+            <div className="top-bar-status">
+              <p className="top-bar-meta mode-pill">
+                <span className="signal-dot" aria-hidden="true" />
+                Deterministic replay
               </p>
               <div className="breadcrumbs" aria-label="Breadcrumb">
                 <strong>BranchLab</strong>
@@ -250,7 +284,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               >
                 <Menu size={16} />
               </Button>
-              <label className="ui-button ui-inline">
+              <label className="ui-button ui-inline" aria-label="Import trace">
                 <Upload size={15} />
                 Import
                 <input
@@ -279,13 +313,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <Button variant="ghost" onClick={() => setHelpOpen(true)} aria-label="Keyboard shortcuts">
                 <HelpCircle size={15} />
               </Button>
-              <Link className="ui-button" href="/settings">
-                Settings
-              </Link>
             </div>
           </div>
           {runningJobs.length > 0 ? (
-            <div className="ui-inline subtle mono" style={{ marginTop: 8 }}>
+            <div className="job-strip subtle mono">
               {runningJobs.map((job) => (
                 <span key={job.id}>
                   {job.type}:{job.status} ({job.progress}%)
@@ -297,6 +328,28 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <main id="main-content" className="main-content" role="main">
           {children}
         </main>
+        <footer className="status-dock" aria-label="Workspace status">
+          <div>
+            <span className="status-dock-label">Workspace</span>
+            <strong>local</strong>
+          </div>
+          <div>
+            <span className="status-dock-label">Trace spine</span>
+            <strong>Trace IR v2</strong>
+          </div>
+          <div>
+            <span className="status-dock-label">Replay mode</span>
+            <strong>deterministic</strong>
+          </div>
+          <div>
+            <span className="status-dock-label">Live tools</span>
+            <strong>disabled</strong>
+          </div>
+          <div>
+            <span className="status-dock-label">Storage</span>
+            <strong>.atl</strong>
+          </div>
+        </footer>
       </div>
 
       {commandOpen ? (
@@ -314,18 +367,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               />
               <div className="ui-stack">
                 <div className="subtle mono">Navigation</div>
-                {links.map((link) => (
-                  <button
-                    key={link.href}
-                    className="ui-button ui-button-ghost"
-                    onClick={() => {
-                      router.push(link.href);
-                      setCommandOpen(false);
-                    }}
-                  >
-                    {link.label}
-                  </button>
-                ))}
+                <div className="command-list">
+                  {links.map((link) => (
+                    <button
+                      key={link.href}
+                      className="ui-button ui-button-ghost"
+                      onClick={() => {
+                        router.push(link.href);
+                        setCommandOpen(false);
+                      }}
+                    >
+                      {link.label}
+                    </button>
+                  ))}
+                </div>
               </div>
               <div className="ui-stack">
                 <div className="subtle mono">Runs</div>
@@ -359,26 +414,26 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <div className="ui-card dialog-panel">
             <div className="ui-stack">
               <h2 style={{ margin: 0 }}>Keyboard shortcuts</h2>
-              <div className="ui-grid ui-grid-cols-2">
-                <div className="ui-card ui-card-plain">
+              <div className="shortcut-grid">
+                <div className="panel-inset">
                   <div className="ui-inline">
                     <span className="kdb">J</span>/<span className="kdb">K</span>
                     <span className="subtle">Next/previous event</span>
                   </div>
                 </div>
-                <div className="ui-card ui-card-plain">
+                <div className="panel-inset">
                   <div className="ui-inline">
                     <span className="kdb">Enter</span>
                     <span className="subtle">Toggle rendered/raw event tab</span>
                   </div>
                 </div>
-                <div className="ui-card ui-card-plain">
+                <div className="panel-inset">
                   <div className="ui-inline">
                     <span className="kdb">F</span>
                     <span className="subtle">Fork from selected event</span>
                   </div>
                 </div>
-                <div className="ui-card ui-card-plain">
+                <div className="panel-inset">
                   <div className="ui-inline">
                     <span className="kdb">Cmd/Ctrl+K</span>
                     <span className="subtle">Open command palette</span>

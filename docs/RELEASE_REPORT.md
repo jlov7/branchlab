@@ -3,6 +3,8 @@
 Date: March 3, 2026  
 Release readiness decision: **GO** (technical gates green)
 
+> Historical note: this report closes the March 2026 release-readiness pass. It is not the current frontier-upgrade status. See [FRONTIER_AUDIT.md](FRONTIER_AUDIT.md) for the live May 2026 audit.
+
 ## Scope
 
 This report closes release tracker `docs/plans/2026-03-03-release-readiness-master.md` (`R01`-`R45`).

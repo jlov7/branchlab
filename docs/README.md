@@ -10,7 +10,7 @@ Use this page as the canonical map for product, engineering, operations, and rel
 | Product and design | [PRD.md](PRD.md) | [UX_UI_SPEC.md](UX_UI_SPEC.md), [UX_COPY_GUIDE.md](UX_COPY_GUIDE.md), [FRONTEND_STYLE_GUIDE.md](FRONTEND_STYLE_GUIDE.md) |
 | Engineers | [ONBOARDING.md](ONBOARDING.md) | [ARCHITECTURE.md](ARCHITECTURE.md), [TECHNICAL_DEEP_DIVE.md](TECHNICAL_DEEP_DIVE.md), [API_CONTRACTS.md](API_CONTRACTS.md) |
 | Security and governance | [THREAT_MODEL.md](THREAT_MODEL.md) | [SECURITY_PRIVACY.md](SECURITY_PRIVACY.md), [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) |
-| Release owners | [RELEASE_PROCESS.md](RELEASE_PROCESS.md) | [RELEASE_SCOPE.md](RELEASE_SCOPE.md), [RELEASE_REPORT.md](RELEASE_REPORT.md), [VERSIONING.md](VERSIONING.md) |
+| Release owners | [FRONTIER_AUDIT.md](FRONTIER_AUDIT.md) | [RELEASE_PROCESS.md](RELEASE_PROCESS.md), [RELEASE_SCOPE.md](RELEASE_SCOPE.md), [RELEASE_REPORT.md](RELEASE_REPORT.md), [VERSIONING.md](VERSIONING.md) |
 
 ## Core Product Docs
 
@@ -21,6 +21,8 @@ Use this page as the canonical map for product, engineering, operations, and rel
 
 ## Architecture And Technical Specs
 
+- [FRONTIER_AUDIT.md](FRONTIER_AUDIT.md)
+- [FRONTIER_BURNDOWN.md](FRONTIER_BURNDOWN.md)
 - [ARCHITECTURE.md](ARCHITECTURE.md)
 - [TECHNICAL_DEEP_DIVE.md](TECHNICAL_DEEP_DIVE.md)
 - [DATA_MODEL.md](DATA_MODEL.md)

@@ -1,12 +1,16 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { compareRunsById } from "@/lib/compareService";
-import { REPO_ROOT } from "@/lib/paths";
-import { evaluatePolicy, savePolicy } from "@/lib/policyService";
-import { resetAllData, saveRun } from "@/lib/runsRepo";
 import type { NormalizedEvent } from "@branchlab/core";
+import { ensureIsolatedDataRoot } from "./dataRoot";
+
+ensureIsolatedDataRoot("branchlab-benchmark-");
 
 async function run(): Promise<void> {
+  const { compareRunsById } = await import("@/lib/compareService");
+  const { REPO_ROOT } = await import("@/lib/paths");
+  const { evaluatePolicy, savePolicy } = await import("@/lib/policyService");
+  const { resetAllData, saveRun } = await import("@/lib/runsRepo");
+
   resetAllData();
 
   const failRunEvents: NormalizedEvent[] = [

@@ -7,7 +7,7 @@
     "dev": "next dev -p ${PORT:-3000}",
     "build": "next build",
     "start": "next start -p ${PORT:-3000}",
-    "lint": "next lint",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
     "e2e": "rm -rf .next && tsx scripts/run_playwright.ts",
@@ -31,16 +31,17 @@
     "@tanstack/react-virtual": "^3.13.12",
     "jsondiffpatch": "^0.7.3",
     "lucide-react": "^0.542.0",
-    "next": "^15.5.2",
+    "next": "^15.5.15",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "zod": "^4.1.5"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.0",
+    "@eslint/eslintrc": "^3.3.5",
     "@playwright/test": "^1.55.0",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",
-    "eslint-config-next": "^15.5.2"
+    "eslint-config-next": "^15.5.15"
   }
 }

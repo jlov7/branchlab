@@ -4,6 +4,7 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { JsonDiffView } from "@/components/JsonDiffView";
 import {
+  Badge,
   Button,
   Card,
   Field,
@@ -60,6 +61,19 @@ interface ComparePayload {
     rationale: string;
     confidence: number;
   }>;
+  tracePhysics?: {
+    firstDivergenceSpanId: string | null;
+    firstDivergenceSequence: number;
+    heatmap: Record<string, number>;
+    diagnostics: Array<{ code: string; spanId: string; severity: string; message: string }>;
+    candidates: Array<{ spanId: string; eventKind: string; confidence: number; rationale: string }>;
+    parent: {
+      evidence: { evidenceHash: string; eventCount: number; roots: string[] };
+    };
+    branch: {
+      evidence: { evidenceHash: string; eventCount: number; roots: string[] };
+    };
+  } | null;
 }
 
 export default function ComparePage() {
@@ -165,6 +179,13 @@ function ComparePageContent() {
   return (
     <Page aria-label="Compare view">
       <Card>
+        <div className="ui-section-header">
+          <div>
+            <p className="eyebrow">Compare</p>
+            <h1>First divergence and semantic branch diff</h1>
+          </div>
+          <Badge>fingerprint aware</Badge>
+        </div>
         <div className="ui-grid" style={{ gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))" }}>
           <Field label="Original">
             <Select value={parent} onChange={(event) => setParent(event.target.value)}>
@@ -256,7 +277,53 @@ function ComparePageContent() {
           </Card>
 
           <Card>
-            <h2 style={{ marginTop: 0 }}>Divergence map</h2>
+            <div className="panel-header">
+              <div>
+                <p className="eyebrow">Trace Physics</p>
+                <h2 style={{ margin: 0 }}>Canonical evidence summary</h2>
+              </div>
+              <Badge tone={(result.tracePhysics?.diagnostics.length ?? 0) > 0 ? "warning" : "success"}>
+                {(result.tracePhysics?.diagnostics.length ?? 0) > 0 ? "diagnostics" : "clean"}
+              </Badge>
+            </div>
+            <div className="ui-grid" style={{ gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))" }}>
+              <Metric
+                label="Parent evidence"
+                value={result.tracePhysics?.parent.evidence.evidenceHash.slice(0, 12) ?? "same"}
+              />
+              <Metric
+                label="Branch evidence"
+                value={result.tracePhysics?.branch.evidence.evidenceHash.slice(0, 12) ?? "same"}
+              />
+              <Metric
+                label="Physics divergence"
+                value={result.tracePhysics?.firstDivergenceSpanId ?? "none"}
+              />
+              <Metric
+                label="Kernel diagnostics"
+                value={String(result.tracePhysics?.diagnostics.length ?? 0)}
+              />
+            </div>
+            <div className="ui-stack" style={{ marginTop: 12 }}>
+              {(result.tracePhysics?.candidates ?? []).slice(0, 3).map((candidate) => (
+                <div key={candidate.spanId} className="panel-inset">
+                  <div className="ui-inline" style={{ justifyContent: "space-between", width: "100%" }}>
+                    <span className="mono">{candidate.spanId}</span>
+                    <span className="mono">{Math.round(candidate.confidence * 100)}%</span>
+                  </div>
+                  <p className="subtle" style={{ margin: "6px 0 0" }}>{candidate.rationale}</p>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          <Card>
+            <div className="panel-header">
+              <div>
+                <p className="eyebrow">Timeline Minimap</p>
+                <h2 style={{ margin: 0 }}>Divergence map</h2>
+              </div>
+            </div>
             <div style={{ position: "relative", border: "1px solid var(--line)", borderRadius: 10, height: 28 }}>
               <div
                 style={{
@@ -304,7 +371,10 @@ function ComparePageContent() {
 
           <Card>
             <div className="ui-inline" style={{ justifyContent: "space-between", width: "100%" }}>
-              <h2 style={{ margin: 0 }}>Changed events</h2>
+              <div>
+                <p className="eyebrow">Event Diff</p>
+                <h2 style={{ margin: 0 }}>Changed events</h2>
+              </div>
               <Tabs>
                 <TabButton active={viewMode === "semantic"} onClick={() => setViewMode("semantic")}>Semantic</TabButton>
                 <TabButton active={viewMode === "side-by-side"} onClick={() => setViewMode("side-by-side")}>Side-by-side</TabButton>
@@ -353,7 +423,7 @@ function ComparePageContent() {
                       <span className="mono">{change.eventId}</span>
                     </div>
                     {viewMode === "semantic" ? (
-                      <JsonDiffView before={change.before} after={change.after} />
+                      <JsonDiffView before={semanticEvent(change.before)} after={semanticEvent(change.after)} />
                     ) : (
                       <div className="ui-grid ui-grid-cols-2">
                         <div>
@@ -377,7 +447,12 @@ function ComparePageContent() {
           </Card>
 
           <Card>
-            <h2 style={{ marginTop: 0 }}>Blame suggestions</h2>
+            <div className="panel-header">
+              <div>
+                <p className="eyebrow">Confidence</p>
+                <h2 style={{ margin: 0 }}>Blame suggestions</h2>
+              </div>
+            </div>
             <div className="ui-grid" style={{ gap: 10 }}>
               {result.blame.map((candidate) => (
                 <div key={candidate.eventId} className="ui-card ui-card-plain" style={{ margin: 0 }}>
@@ -407,6 +482,15 @@ function ComparePageContent() {
       ) : null}
     </Page>
   );
+}
+
+function semanticEvent(event: unknown): unknown {
+  if (!event || typeof event !== "object" || Array.isArray(event)) {
+    return event;
+  }
+  const semantic = { ...(event as Record<string, unknown>) };
+  delete semantic.run_id;
+  return semantic;
 }
 
 function Metric({ label, value }: { label: string; value: string }) {

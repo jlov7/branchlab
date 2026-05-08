@@ -1,6 +1,21 @@
 # Acceptance Checklist
 
-Status date: March 3, 2026
+Historical status date: March 3, 2026
+Current audit reference: [FRONTIER_AUDIT.md](FRONTIER_AUDIT.md)
+
+This checklist records the March 2026 MVP/release baseline. It should not be read as current proof that the frontier upgrade has no open risks.
+
+## Current Frontier Gate
+
+- [x] `pnpm check`
+- [x] `pnpm e2e`
+- [x] `pnpm audit --prod --audit-level high`
+- [x] `pnpm sast`
+- [x] `pnpm scan:secrets`
+- [x] Trace IR v2 foundation tests pass
+- [x] Data reset safety tests pass
+
+## Historical March 2026 Baseline
 
 ## Build & quality gates
 - [x] `make setup` succeeds on a clean machine

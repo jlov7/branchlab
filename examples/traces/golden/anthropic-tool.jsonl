@@ -1,0 +1,1 @@
+{"provider":"anthropic","type":"tool_use","run_id":"anthropic_trace","event_id":"tool_use_1","ts":"2026-05-08T00:00:00Z","call_id":"tool_1","name":"pricing.lookup","args":{"product":"ACME"}}

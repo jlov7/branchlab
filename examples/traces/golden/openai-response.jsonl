@@ -1,0 +1,1 @@
+{"provider":"openai","type":"response.completed","run_id":"openai_trace","event_id":"resp_done","ts":"2026-05-08T00:00:00Z","response":{"id":"resp_1","output_text":"done","status":"completed"}}

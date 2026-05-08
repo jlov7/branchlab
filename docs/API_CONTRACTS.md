@@ -12,10 +12,12 @@ Base path: `/api`
   - `partialParse: boolean`
   - `issues: Array<{ line: number; reason: string }>`
   - `validationReportId?: string`
+  - `telemetry: { fileName, byteLength, parsedEvents, insertedEvents, issueCount, partialParse, durationMs }`
 - Response `202` (async):
   - `jobId: string`
   - `statusUrl: string`
   - `cancelUrl: string`
+  - Completed job `result.telemetry` contains the same import telemetry shape.
 
 ## `GET /runs`
 
@@ -52,6 +54,21 @@ Base path: `/api`
   - `tags?: string[]`
   - `note?: string`
 - Response `200`: `{ annotation: RunAnnotation }`
+
+## `GET /span-annotations`
+
+- Query: `runId?: string`, `spanId?: string`
+- Response `200`: `{ annotations: SpanAnnotation[] }`
+
+## `POST /span-annotations`
+
+- Request:
+  - `runId: string`
+  - `spanId: string`
+  - `note: string`
+  - `tags?: string[]`
+  - `investigationId?: string`
+- Response `200`: `{ annotation: SpanAnnotation }`
 
 ## `POST /branches`
 

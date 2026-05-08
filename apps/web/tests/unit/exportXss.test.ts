@@ -3,8 +3,10 @@ import { join } from "node:path";
 import { beforeEach, describe, expect, it } from "vitest";
 import type { NormalizedEvent } from "@branchlab/core";
 import { exportBundle } from "@/lib/exportService";
+import { saveInvestigation } from "@/lib/investigationService";
 import { EXPORTS_DIR } from "@/lib/paths";
 import { resetAllData, saveRun } from "@/lib/runsRepo";
+import { createSpanAnnotation } from "@/lib/spanAnnotationService";
 
 describe("export service security", () => {
   beforeEach(() => {
@@ -75,12 +77,39 @@ describe("export service security", () => {
       partialParse: false,
       issues: [],
     });
+    saveInvestigation({
+      runId,
+      title: "Contact alice@example.com",
+      hypothesis: "Tool output leaked key sk_abcdef1234567890",
+      pinnedSpanIds: ["span_secret"],
+      evidenceHash: "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    });
+    createSpanAnnotation({
+      runId,
+      spanId: "e1",
+      note: "Reviewer saw alice@example.com in span output with key sk_abcdef1234567890",
+      tags: ["review"],
+    });
 
     const bundle = exportBundle({ runId, redacted: true });
     const runJson = readFileSync(join(EXPORTS_DIR, bundle.id, "run.json"), "utf8");
+    const investigationsJson = readFileSync(join(EXPORTS_DIR, bundle.id, "investigations.json"), "utf8");
+    const spanAnnotationsJson = readFileSync(join(EXPORTS_DIR, bundle.id, "span_annotations.json"), "utf8");
+    const provenanceJson = readFileSync(join(EXPORTS_DIR, bundle.id, "provenance.json"), "utf8");
 
     expect(runJson).toContain("[REDACTED_EMAIL]");
     expect(runJson).toContain("[REDACTED_PHONE]");
     expect(runJson).toContain("[REDACTED_KEY]");
+    expect(investigationsJson).toContain("[REDACTED_EMAIL]");
+    expect(investigationsJson).toContain("[REDACTED_KEY]");
+    expect(spanAnnotationsJson).toContain("[REDACTED_EMAIL]");
+    expect(spanAnnotationsJson).toContain("[REDACTED_KEY]");
+    expect(bundle.files).toContain("trace_ir.json");
+    expect(bundle.files).toContain("investigations.json");
+    expect(bundle.files).toContain("span_annotations.json");
+    expect(bundle.files).toContain("causal_diff.json");
+    expect(provenanceJson).toContain("runFingerprint");
+    expect(provenanceJson).toContain("investigationCount");
+    expect(provenanceJson).toContain("spanAnnotationCount");
   });
 });

@@ -1,6 +1,7 @@
 # UX Audit - World-Class Readiness
 
-Date: March 3, 2026
+Historical audit date: March 3, 2026
+Current audit reference: [FRONTIER_AUDIT.md](FRONTIER_AUDIT.md)
 
 ## What Improved
 
@@ -23,5 +24,6 @@ Date: March 3, 2026
 
 ## Residual Risks
 
-1. No blocking frontend risks remain for release readiness.
-2. Future improvements are optional and no longer gate launch quality.
+1. No blocking frontend risks remained for the March 2026 release-readiness goal.
+2. This is not a current claim that BranchLab has no residual product, reliability, security, or frontier-runtime risks.
+3. Current frontier risks and next gates are tracked in [FRONTIER_AUDIT.md](FRONTIER_AUDIT.md).

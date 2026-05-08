@@ -221,7 +221,13 @@ export default function PolicyPage() {
   return (
     <Page aria-label="Policy lab">
       <Card className="page-header">
-        <h1 style={{ marginTop: 0 }}>Policy Lab</h1>
+        <div className="ui-section-header">
+          <div>
+            <p className="eyebrow">Policy Lab</p>
+            <h1 style={{ margin: 0 }}>Policy Lab</h1>
+          </div>
+          <Badge>what-if analysis</Badge>
+        </div>
         <p className="subtle">
           Author YAML or Rego policies, version them, and run impact simulations across traces.
         </p>
@@ -262,7 +268,7 @@ export default function PolicyPage() {
           </Field>
         ) : null}
 
-        <div style={{ border: "1px solid var(--line)", borderRadius: 12, overflow: "hidden" }}>
+        <div style={{ border: "1px solid var(--line)", borderRadius: 8, overflow: "hidden" }}>
           <Editor
             height="360px"
             language={backend === "yaml" ? "yaml" : "rego"}
@@ -300,7 +306,7 @@ export default function PolicyPage() {
           </Select>
         </Field>
 
-        <Card className="ui-card-plain" style={{ margin: 0 }}>
+        <div className="panel-inset">
           <div className="subtle mono" style={{ marginBottom: 8 }}>
             Select traces
           </div>
@@ -324,7 +330,7 @@ export default function PolicyPage() {
               </label>
             ))}
           </div>
-        </Card>
+        </div>
 
         <div className="ui-inline">
           <Button onClick={() => void evaluate()} disabled={!selectedPolicy || selectedRuns.length === 0}>
@@ -346,14 +352,14 @@ export default function PolicyPage() {
         </div>
 
         {jobHistory.length > 0 ? (
-          <Card className="ui-card-plain" style={{ margin: 0 }} role="status" aria-live="polite">
+          <div className="panel-inset" role="status" aria-live="polite">
             <div className="subtle mono">Job timeline</div>
             <ol className="mono" style={{ marginBottom: 0 }}>
               {jobHistory.map((entry, index) => (
                 <li key={`${entry}_${index}`}>{entry}</li>
               ))}
             </ol>
-          </Card>
+          </div>
         ) : null}
       </Card>
 
@@ -385,7 +391,7 @@ export default function PolicyPage() {
 function ChartCard({ title, values }: { title: string; values: Array<[string, number]> }) {
   const max = Math.max(1, ...values.map((entry) => entry[1]));
   return (
-    <Card className="ui-card-plain" style={{ margin: 0 }}>
+    <div className="panel-inset">
       <h3 style={{ marginTop: 0 }}>{title}</h3>
       {values.length === 0 ? (
         <p className="subtle">No data</p>
@@ -411,6 +417,6 @@ function ChartCard({ title, values }: { title: string; values: Array<[string, nu
           ))}
         </div>
       )}
-    </Card>
+    </div>
   );
 }

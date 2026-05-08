@@ -34,6 +34,9 @@ test("golden ui flow: replay -> fork -> compare -> policy", async ({ page }) => 
   await expect(page.getByRole("heading", { name: "Changed events" })).toBeVisible({
     timeout: NAV_TIMEOUT_MS,
   });
+  await expect(page.getByRole("heading", { name: "Canonical evidence summary" })).toBeVisible({
+    timeout: NAV_TIMEOUT_MS,
+  });
 
   await page.goto("/policy");
   await expect(page.getByRole("heading", { name: "Policy Lab" })).toBeVisible({ timeout: NAV_TIMEOUT_MS });

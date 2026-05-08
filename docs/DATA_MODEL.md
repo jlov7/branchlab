@@ -124,6 +124,22 @@ Indexes:
 Indexes:
 - `(updated_at)`
 
+## Span annotations
+`span_annotations`
+- `id` TEXT PRIMARY KEY
+- `run_id` TEXT
+- `investigation_id` TEXT NULL
+- `span_id` TEXT
+- `note` TEXT
+- `tags_json` TEXT
+- `created_at` TEXT
+- `updated_at` TEXT
+
+Indexes:
+- `(run_id, updated_at)`
+- `(run_id, span_id)`
+- `(investigation_id)`
+
 ## Jobs
 `jobs`
 - `id` TEXT PRIMARY KEY
@@ -151,8 +167,78 @@ Indexes:
 Indexes:
 - `(run_id, created_at)`
 
+## Trace IR v2
+`trace_ir_events`
+- `run_id` TEXT
+- `span_id` TEXT
+- `trace_id` TEXT
+- `sequence` INTEGER
+- `event_kind` TEXT
+- `parent_span_id` TEXT NULL
+- `causal_parent_ids_json` TEXT
+- `provider` TEXT NULL
+- `model` TEXT NULL
+- `tool_call_id` TEXT NULL
+- `hash` TEXT
+- `redaction_state` TEXT
+- `timing_json` TEXT
+- `usage_json` TEXT NULL
+- `policy_json` TEXT NULL
+- `data_blob_sha` TEXT
+
+Indexes:
+- `(run_id, sequence)`
+- `(run_id, event_kind)`
+- `(run_id, hash)`
+- `(run_id, tool_call_id)`
+
+`trace_fingerprints`
+- `run_id` TEXT PRIMARY KEY
+- `fingerprint` TEXT
+- `event_count` INTEGER
+- `generated_at` TEXT
+
+## Runtime, eval, and evidence
+`runtime_executions`
+- `id` TEXT PRIMARY KEY
+- `parent_run_id` TEXT NULL
+- `branch_run_id` TEXT
+- `mode` TEXT
+- `provider_id` TEXT NULL
+- `allow_live_tools` INTEGER
+- `live_tool_allowlist_json` TEXT
+- `budget_json` TEXT
+- `side_effects_json` TEXT
+- `status` TEXT
+- `created_at` TEXT
+
+`eval_datasets`
+- `id` TEXT PRIMARY KEY
+- `name` TEXT
+- `description` TEXT
+- `run_ids_json` TEXT
+- `created_at` TEXT
+
+`eval_runs`
+- `id` TEXT PRIMARY KEY
+- `dataset_id` TEXT
+- `name` TEXT
+- `status` TEXT
+- `summary_json` TEXT
+- `results_json` TEXT
+- `created_at` TEXT
+
+`evidence_packs`
+- `id` TEXT PRIMARY KEY
+- `run_id` TEXT
+- `branch_run_id` TEXT NULL
+- `export_id` TEXT NULL
+- `provenance_json` TEXT
+- `created_at` TEXT
+
 ## Blob store
 Blobs are JSON stored at:
-- `.atl/blobs/<sha256>.json`
+- `.atl/blobs/<sha-prefix>/<sha256>.json` for new writes
+- `.atl/blobs/<sha256>.json` for older flat-layout blobs
 
 Keep blobs immutable.

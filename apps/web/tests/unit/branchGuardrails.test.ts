@@ -3,6 +3,7 @@ import type { NormalizedEvent } from "@branchlab/core";
 import { createBranch } from "@/lib/branchService";
 import { getAllRunEvents, getRun, resetAllData, saveRun } from "@/lib/runsRepo";
 import { updateSettings } from "@/lib/settings";
+import { listRuntimeExecutions } from "@/lib/runtimeService";
 
 describe("re-exec guardrails", () => {
   beforeEach(() => {
@@ -59,6 +60,7 @@ describe("re-exec guardrails", () => {
     expect(getRun(branch.branchRunId)?.status).toBe("fail");
     const events = getAllRunEvents(branch.branchRunId);
     expect(events.some((event) => event.event_id.includes("allowlist") && event.type === "error")).toBe(true);
+    expect(listRuntimeExecutions()[0]?.allowLiveTools).toBe(true);
   });
 
   it("emits call-limit guardrail error when max calls exceeded", async () => {

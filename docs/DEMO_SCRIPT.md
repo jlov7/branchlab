@@ -1,4 +1,4 @@
-# Demo Script (2–4 minutes)
+# Demo Script (5 minutes)
 
 ## Setup
 1. `make setup`
@@ -6,7 +6,7 @@
 3. Open the app.
 
 ## Part 1 — Replay (30–60s)
-1. Click **Try demo trace**.
+1. Click **Seed demo trace**.
 2. Open run `run_demo_fail`.
 3. Show:
    - Summary strip (status = FAIL)
@@ -35,14 +35,17 @@ Show:
 - Branch creation progress
 - Branch appears in Runs list
 
-## Part 3 — Compare (60–90s)
+## Part 3 — Compare + Causality (90s)
 1. Click **Compare**.
 2. Select Original vs Branch.
 3. Show:
    - Outcome delta: FAIL → SUCCESS
    - First divergence marker
    - Changed tool output diff
-   - Blame panel identifies the overridden tool output as the earliest flip candidate
+   - Trace physics evidence hash
+   - Candidate confidence
+4. Open **Causality**.
+5. Save an investigation, select a candidate span, add a reviewer note, and resolve the hypothesis.
 
 Key line:
 > “This is why we need counterfactual branching: we can prove which step mattered.”
@@ -55,3 +58,11 @@ Key line:
 
 Close with:
 > “Now governance can run ‘what would this policy have prevented?’ on real traces.”
+
+## Part 5 — Evidence Pack (30s)
+1. Open **Evidence**.
+2. Create a redacted evidence pack.
+3. Show the exported contract: normalized trace, Trace IR, trace physics, causal diff, evals, policies, investigations, span annotations, and provenance.
+
+Close with:
+> “The artifact is the product: another engineer can inspect the same evidence without trusting the UI.”

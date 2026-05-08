@@ -52,7 +52,7 @@ Typical tracing tools show “what happened” but do not support **what-if** ex
 ## 6) Core user journeys
 
 ### Journey A: Import → Replay → Explain
-1. User uploads a JSONL trace (or clicks “Try demo trace”)
+1. User uploads a JSONL trace (or clicks “Seed demo trace”)
 2. App parses and stores run locally
 3. User views run report:
    - success/failure summary

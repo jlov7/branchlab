@@ -1,10 +1,25 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 
 const NAV_TIMEOUT_MS = 30_000;
+
+async function prepareVisualSnapshot(page: Page): Promise<void> {
+  await page.addStyleTag({
+    content: `
+      nextjs-portal,
+      [data-nextjs-toast],
+      [data-nextjs-dialog-overlay],
+      [data-nextjs-dialog],
+      [data-nextjs-dev-overlay] {
+        display: none !important;
+      }
+    `,
+  });
+}
 
 test.describe("visual regression", () => {
   test("landing snapshot", async ({ page }) => {
     await page.goto("/");
+    await prepareVisualSnapshot(page);
     await expect(page).toHaveScreenshot("landing.png", { fullPage: true });
   });
 
@@ -13,6 +28,7 @@ test.describe("visual regression", () => {
     expect(seed.ok()).toBeTruthy();
     await page.goto("/runs");
     await expect(page).toHaveURL(/\/runs/, { timeout: NAV_TIMEOUT_MS });
+    await prepareVisualSnapshot(page);
     await expect(page).toHaveScreenshot("runs.png", { fullPage: true });
   });
 
@@ -39,6 +55,7 @@ test.describe("visual regression", () => {
 
     await page.goto(`/compare?parent=run_demo_fail&branch=${branch.branchRunId}`);
     await page.getByRole("button", { name: "Compare" }).click();
+    await prepareVisualSnapshot(page);
     await expect(page.getByRole("heading", { name: "Changed events" })).toBeVisible({
       timeout: NAV_TIMEOUT_MS,
     });

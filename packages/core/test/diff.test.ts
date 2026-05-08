@@ -48,4 +48,10 @@ describe("compareRuns", () => {
     expect(result.deltas.outcome.from).toBe("fail");
     expect(result.deltas.outcome.to).toBe("success");
   });
+
+  it("does not treat run_id as semantic divergence", () => {
+    const result = compareRuns(parent, parent.map((event) => ({ ...event, run_id: "branch" })));
+    expect(result.divergence.firstDivergenceIndex).toBe(-1);
+    expect(result.stats.modified).toBe(0);
+  });
 });

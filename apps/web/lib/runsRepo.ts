@@ -1,11 +1,12 @@
 import { rmSync } from "node:fs";
-import { determineOutcome, scoreRun } from "@branchlab/core";
-import type { BranchExecutionMode, NormalizedEvent } from "@branchlab/core";
-import { readBlobJson, writeBlobJson } from "./blobStore";
+import { determineOutcome, replayFingerprint, scoreRun, traceIrFromNormalizedEvent } from "@branchlab/core";
+import type { BranchExecutionMode, NormalizedEvent, TraceIrEventV2 } from "@branchlab/core";
+import { readBlobJson, resetBlobCache, writeBlobJson } from "./blobStore";
+import { assertSafeDataReset } from "./dataSafety";
 import { resetDbConnection } from "./db";
 import { getDb } from "./db";
 import { newId } from "./ids";
-import { ATL_DIR } from "./paths";
+import { ATL_DIR, DEFAULT_ATL_DIR } from "./paths";
 
 export interface RunSummary {
   id: string;
@@ -25,6 +26,22 @@ export interface RunAnnotation {
   tags: string[];
   note: string;
   updatedAt: string;
+}
+
+export interface BranchSummary {
+  id: string;
+  parentRunId: string;
+  forkEventId: string;
+  branchRunId: string;
+  createdAt: string;
+  intervention: Record<string, unknown>;
+}
+
+export interface TraceFingerprint {
+  runId: string;
+  fingerprint: string;
+  eventCount: number;
+  generatedAt: string;
 }
 
 export interface ListRunsOptions {
@@ -96,8 +113,27 @@ export function saveRun(input: SaveRunInput): { runId: string; insertedEvents: n
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `,
     );
+    const insertTraceIr = db.prepare(
+      `
+      INSERT OR REPLACE INTO trace_ir_events (
+        run_id, span_id, trace_id, sequence, event_kind, parent_span_id, causal_parent_ids_json,
+        provider, model, tool_call_id, hash, redaction_state, timing_json, usage_json, policy_json, data_blob_sha
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `,
+    );
 
-    for (const event of events) {
+    db.prepare(`DELETE FROM events WHERE run_id = ?`).run(runId);
+    db.prepare(`DELETE FROM trace_ir_events WHERE run_id = ?`).run(runId);
+
+    const traceIrEvents = events.map((event, sequence) => traceIrFromNormalizedEvent(event, sequence));
+
+    for (let index = 0; index < events.length; index += 1) {
+      const event = events[index];
+      const traceIr = traceIrEvents[index];
+      if (!event || !traceIr) {
+        continue;
+      }
       const callId = typeof event.data.call_id === "string" ? event.data.call_id : null;
       const dataBlobSha = writeBlobJson(event.data);
       insertEvent.run(
@@ -110,7 +146,37 @@ export function saveRun(input: SaveRunInput): { runId: string; insertedEvents: n
         dataBlobSha,
         JSON.stringify(event.meta ?? {}),
       );
+
+      insertTraceIr.run(
+        runId,
+        traceIr.spanId,
+        traceIr.traceId,
+        traceIr.sequence,
+        traceIr.eventKind,
+        traceIr.parentSpanId ?? null,
+        JSON.stringify(traceIr.causalParentIds),
+        traceIr.provider ?? null,
+        traceIr.model ?? null,
+        traceIr.toolCallId ?? null,
+        traceIr.hash,
+        traceIr.redactionState,
+        JSON.stringify(traceIr.timing),
+        traceIr.usage ? JSON.stringify(traceIr.usage) : null,
+        traceIr.policy ? JSON.stringify(traceIr.policy) : null,
+        writeBlobJson(traceIr.data),
+      );
     }
+
+    db.prepare(
+      `
+      INSERT INTO trace_fingerprints (run_id, fingerprint, event_count, generated_at)
+      VALUES (?, ?, ?, ?)
+      ON CONFLICT(run_id) DO UPDATE SET
+        fingerprint = excluded.fingerprint,
+        event_count = excluded.event_count,
+        generated_at = excluded.generated_at
+    `,
+    ).run(runId, replayFingerprint(traceIrEvents), traceIrEvents.length, now);
 
     db.exec("COMMIT");
   } catch (error) {
@@ -291,6 +357,91 @@ export function getAllRunEvents(runId: string): NormalizedEvent[] {
   return getRunEvents(runId, 0, 1_000_000);
 }
 
+export function getRunTraceIrEvents(runId: string): TraceIrEventV2[] {
+  return getRunTraceIrRows(runId, true);
+}
+
+export function getRunTraceIrIndex(runId: string): TraceIrEventV2[] {
+  return getRunTraceIrRows(runId, false);
+}
+
+function getRunTraceIrRows(runId: string, includeData: boolean): TraceIrEventV2[] {
+  const db = getDb();
+  const rows = db
+    .prepare(
+      `
+      SELECT trace_id, span_id, sequence, event_kind, parent_span_id, causal_parent_ids_json,
+        provider, model, tool_call_id, hash, redaction_state, timing_json, usage_json, policy_json
+        ${includeData ? ", data_blob_sha" : ""}
+      FROM trace_ir_events
+      WHERE run_id = ?
+      ORDER BY sequence ASC, span_id ASC
+    `,
+    )
+    .all(runId) as Array<{
+    trace_id: string;
+    span_id: string;
+    sequence: number;
+    event_kind: TraceIrEventV2["eventKind"];
+    parent_span_id: string | null;
+    causal_parent_ids_json: string;
+    provider: string | null;
+    model: string | null;
+    tool_call_id: string | null;
+    hash: string;
+    redaction_state: TraceIrEventV2["redactionState"];
+    timing_json: string;
+    usage_json: string | null;
+    policy_json: string | null;
+    data_blob_sha?: string;
+  }>;
+
+  return rows.map((row) => ({
+    schema: "branchlab.trace_ir.v2",
+    traceId: row.trace_id,
+    runId,
+    spanId: row.span_id,
+    parentSpanId: row.parent_span_id ?? undefined,
+    sequence: row.sequence,
+    eventKind: row.event_kind,
+    provider: row.provider ?? undefined,
+    model: row.model ?? undefined,
+    toolCallId: row.tool_call_id ?? undefined,
+    inputRef: undefined,
+    outputRef: undefined,
+    hash: row.hash,
+    redactionState: row.redaction_state,
+    causalParentIds: parseStringArray(row.causal_parent_ids_json),
+    timing: parseJson(row.timing_json, {}),
+    usage: row.usage_json ? parseJson(row.usage_json, undefined) : undefined,
+    policy: row.policy_json ? parseJson(row.policy_json, undefined) : undefined,
+    data: includeData && row.data_blob_sha ? readBlobJson<Record<string, unknown>>(row.data_blob_sha) : {},
+  }));
+}
+
+export function getTraceFingerprint(runId: string): TraceFingerprint | null {
+  const db = getDb();
+  const row = db
+    .prepare(`SELECT run_id, fingerprint, event_count, generated_at FROM trace_fingerprints WHERE run_id = ?`)
+    .get(runId) as
+    | {
+        run_id: string;
+        fingerprint: string;
+        event_count: number;
+        generated_at: string;
+      }
+    | undefined;
+
+  return row
+    ? {
+        runId: row.run_id,
+        fingerprint: row.fingerprint,
+        eventCount: row.event_count,
+        generatedAt: row.generated_at,
+      }
+    : null;
+}
+
 export function createBranchRecord(args: {
   parentRunId: string;
   forkEventId: string;
@@ -315,6 +466,36 @@ export function createBranchRecord(args: {
   );
 
   return id;
+}
+
+export function listBranchesForRun(runId: string): BranchSummary[] {
+  const db = getDb();
+  const rows = db
+    .prepare(
+      `
+      SELECT id, parent_run_id, fork_event_id, created_at, branch_run_id, intervention_json
+      FROM branches
+      WHERE parent_run_id = ? OR branch_run_id = ?
+      ORDER BY created_at DESC
+    `,
+    )
+    .all(runId, runId) as Array<{
+    id: string;
+    parent_run_id: string;
+    fork_event_id: string;
+    created_at: string;
+    branch_run_id: string;
+    intervention_json: string;
+  }>;
+
+  return rows.map((row) => ({
+    id: row.id,
+    parentRunId: row.parent_run_id,
+    forkEventId: row.fork_event_id,
+    branchRunId: row.branch_run_id,
+    createdAt: row.created_at,
+    intervention: parseJson(row.intervention_json, {}),
+  }));
 }
 
 export function getRunAnnotation(runId: string): RunAnnotation | null {
@@ -366,9 +547,16 @@ export function upsertRunAnnotation(args: { runId: string; tags: string[]; note:
   };
 }
 
-export function resetAllData(): void {
+export function resetAllData(options: { allowDefaultRoot?: boolean } = {}): void {
+  assertSafeDataReset({
+    targetDir: ATL_DIR,
+    defaultDataDir: DEFAULT_ATL_DIR,
+    customRoot: process.env.BRANCHLAB_ROOT,
+    allowDefaultRoot: options.allowDefaultRoot,
+  });
   resetDbConnection();
   rmSync(ATL_DIR, { recursive: true, force: true });
+  resetBlobCache();
 }
 
 function listRunTools(runId: string): string[] {
@@ -421,4 +609,17 @@ function listRunAnnotationsByRunId(runIds: string[]): Map<string, RunAnnotation>
   }
 
   return map;
+}
+
+function parseStringArray(value: string): string[] {
+  const parsed = parseJson<unknown>(value, []);
+  return Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === "string") : [];
+}
+
+function parseJson<T>(value: string, fallback: T): T {
+  try {
+    return JSON.parse(value) as T;
+  } catch {
+    return fallback;
+  }
 }

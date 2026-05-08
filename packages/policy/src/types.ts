@@ -26,9 +26,18 @@ export interface YamlRule {
   id: string;
   when: {
     tool?: string[];
+    args?: {
+      contains?: string;
+      pii?: boolean;
+      secret?: boolean;
+    };
     result?: {
       price_gt?: number;
+      contains?: string;
+      pii?: boolean;
+      secret?: boolean;
     };
+    tool_risk_at_least?: "low" | "medium" | "high" | "critical";
   };
   then: {
     decision: PolicyDecisionValue;
@@ -59,4 +68,5 @@ export interface PolicyDecisionRecord {
   callId: string;
   tool: string;
   decision: PolicyDecision;
+  meta?: Record<string, unknown>;
 }

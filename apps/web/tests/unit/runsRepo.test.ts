@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { resetAllData, saveRun, getRun, getAllRunEvents } from "@/lib/runsRepo";
+import { resetAllData, saveRun, getRun, getAllRunEvents, getRunTraceIrEvents, getRunTraceIrIndex, getTraceFingerprint } from "@/lib/runsRepo";
 import type { NormalizedEvent } from "@branchlab/core";
 
 describe("runsRepo", () => {
@@ -40,5 +40,11 @@ describe("runsRepo", () => {
 
     const loadedEvents = getAllRunEvents(saved.runId);
     expect(loadedEvents).toHaveLength(2);
+
+    const traceIr = getRunTraceIrEvents(saved.runId);
+    expect(traceIr).toHaveLength(2);
+    expect(traceIr[0]?.hash).toHaveLength(64);
+    expect(getRunTraceIrIndex(saved.runId)[0]?.data).toEqual({});
+    expect(getTraceFingerprint(saved.runId)?.fingerprint).toHaveLength(64);
   });
 });

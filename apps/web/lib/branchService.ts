@@ -7,6 +7,7 @@ import {
 import { createBranchRecord, getAllRunEvents, saveRun } from "./runsRepo";
 import { getSettings, listProviders } from "./settings";
 import { executeWithProvider } from "./providers";
+import { recordRuntimeExecution } from "./runtimeService";
 
 export interface CreateBranchResult {
   branchId: string;
@@ -49,6 +50,30 @@ export async function createBranch(spec: BranchSpec): Promise<CreateBranchResult
     forkEventId: spec.forkEventId,
     branchRunId: saved.runId,
     intervention: spec.intervention,
+  });
+  const settings = getSettings();
+  const allowlist = spec.liveToolAllowlist?.length ? spec.liveToolAllowlist : settings.liveToolAllowlist;
+  recordRuntimeExecution({
+    parentRunId: spec.parentRunId,
+    branchRunId: saved.runId,
+    mode: spec.mode,
+    providerId: spec.providerId,
+    allowLiveTools: spec.allowLiveTools ?? false,
+    liveToolAllowlist: allowlist,
+    budget: {
+      maxCalls: settings.reexecMaxCalls,
+      maxTokens: settings.reexecMaxTokens,
+      maxCostUsd: settings.reexecMaxCostUsd,
+    },
+    sideEffects: {
+      liveToolsEnabled: spec.allowLiveTools ?? false,
+      expectedExternalCalls: spec.mode === "reexec" ? branchEvents.filter((event) => event.type === "llm.request").length : 0,
+      notes:
+        spec.mode === "reexec"
+          ? ["Model calls require provider configuration; tool calls are stubbed unless allowlisted."]
+          : ["Replay branch uses recorded artifacts only."],
+    },
+    status: determineOutcome(branchEvents),
   });
 
   return {

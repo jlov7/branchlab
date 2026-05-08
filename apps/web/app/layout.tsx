@@ -16,7 +16,7 @@ const monoFont = IBM_Plex_Mono({
 
 export const metadata: Metadata = {
   title: "BranchLab",
-  description: "Replay and fork agent runs locally with deterministic evidence.",
+  description: "Local-first agent reliability lab for traces, causality, evals, policy simulation, and evidence packs.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

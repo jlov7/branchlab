@@ -79,18 +79,19 @@ This spec is intentionally strict. The UX must feel like premium developer tooli
 
 ## 4) Core screens & required interactions
 
-## Screen A — Landing / Onboarding
-**Goal:** instant comprehension + one-click demo.
+## Screen A — Workbench / Onboarding
+**Goal:** instant comprehension, one-click demo, and live local reliability state.
 
 Required components:
-- Hero title: “Replay and fork agent runs”
+- Workbench title: “Replayable agent reliability.”
 - Two CTAs:
-  - “Try demo trace (30 sec)”
-  - “Import JSONL”
-- Three feature cards:
-  - Replay
-  - Fork
-  - Compare
+  - “Seed demo trace”
+  - “Import JSONL / JSON”
+- First-viewport panels:
+  - Local run metrics
+  - Trace minimap / empty state
+  - Evidence stack
+  - Import telemetry
 - Small footer:
   - “Local-first. Stored under .atl/”
   - “Delete all data” button (opens confirm modal)

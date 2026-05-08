@@ -1,0 +1,1 @@
+{"trace_id":"mlflow_trace","span_id":"mlflow_llm","parent_span_id":"mlflow_parent","span_type":"LLM","inputs":{"messages":[{"role":"user","content":"quote"}]},"outputs":{"text":"ok"},"attributes":{"gen_ai.provider.name":"openai","gen_ai.request.model":"gpt-5.5"}}

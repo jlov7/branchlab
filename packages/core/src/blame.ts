@@ -57,7 +57,7 @@ export function suggestBlameCandidates(
     }
   }
 
-  return candidates
+  return dedupeCandidates(candidates)
     .sort((a, b) => {
       if (b.confidence !== a.confidence) {
         return b.confidence - a.confidence;
@@ -65,6 +65,17 @@ export function suggestBlameCandidates(
       return a.eventId.localeCompare(b.eventId);
     })
     .slice(0, 3);
+}
+
+function dedupeCandidates(candidates: BlameCandidate[]): BlameCandidate[] {
+  const best = new Map<string, BlameCandidate>();
+  for (const candidate of candidates) {
+    const current = best.get(candidate.eventId);
+    if (!current || candidate.confidence > current.confidence) {
+      best.set(candidate.eventId, candidate);
+    }
+  }
+  return [...best.values()];
 }
 
 function bisectionFallback(events: NormalizedEvent[]): BlameCandidate | null {

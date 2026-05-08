@@ -27,7 +27,7 @@ export function compareRuns(parentEvents: NormalizedEvent[], branchEvents: Norma
       continue;
     }
 
-    if (before && after && JSON.stringify(before) !== JSON.stringify(after)) {
+    if (before && after && !sameEventSemantics(before, after)) {
       if (firstDivergenceIndex < 0) {
         firstDivergenceIndex = index;
       }
@@ -62,6 +62,18 @@ export function compareRuns(parentEvents: NormalizedEvent[], branchEvents: Norma
       toolErrorRate: round(branchScore.toolErrorRate - parentScore.toolErrorRate),
     },
   };
+}
+
+function sameEventSemantics(before: NormalizedEvent, after: NormalizedEvent): boolean {
+  return (
+    before.schema === after.schema &&
+    before.event_id === after.event_id &&
+    before.ts === after.ts &&
+    before.type === after.type &&
+    before.parent_event_id === after.parent_event_id &&
+    JSON.stringify(before.data) === JSON.stringify(after.data) &&
+    JSON.stringify(before.meta ?? {}) === JSON.stringify(after.meta ?? {})
+  );
 }
 
 function round(value: number): number {

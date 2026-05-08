@@ -1,9 +1,9 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { NormalizedEvent } from "@branchlab/core";
-import { REPO_ROOT } from "@/lib/paths";
-import { compareRunsById } from "@/lib/compareService";
-import { resetAllData, saveRun } from "@/lib/runsRepo";
+import { ensureIsolatedDataRoot } from "./dataRoot";
+
+ensureIsolatedDataRoot("branchlab-perf-");
 
 const EVENT_BUDGET = Number(process.env.BRANCHLAB_PERF_EVENTS ?? 100000);
 const MAX_INGEST_MS = Number(process.env.BRANCHLAB_PERF_MAX_INGEST_MS ?? 25000);
@@ -52,7 +52,11 @@ function buildEvents(runId: string, count: number): NormalizedEvent[] {
   return events;
 }
 
-function run(): void {
+async function run(): Promise<void> {
+  const { REPO_ROOT } = await import("@/lib/paths");
+  const { compareRunsById } = await import("@/lib/compareService");
+  const { resetAllData, saveRun } = await import("@/lib/runsRepo");
+
   resetAllData();
   const base = buildEvents("run_perf_parent", EVENT_BUDGET);
   const branch = structuredClone(base);
@@ -121,4 +125,4 @@ function run(): void {
   }
 }
 
-run();
+void run();
