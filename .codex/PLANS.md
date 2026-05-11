@@ -13,7 +13,7 @@ Run one more critical repo pass after the frontier/frontend/video work and close
 - [x] Document saved investigation API/schema and refresh public audit caveats
 - [x] Add final Karpathy-grade audit scorecard and residual burn-down
 - [x] Run targeted browser flow, full quality/security gates, visual matrix, and repo hygiene checks
-- [ ] Commit and push the completed hardening slice
+- [x] Commit and push the completed hardening slice
 
 ## Surprises & Discoveries
 
@@ -23,6 +23,9 @@ Run one more critical repo pass after the frontier/frontend/video work and close
 - Date: 2026-05-08
   Discovery: Causal Debugger span annotations were associated with the first investigation in the payload rather than the investigator-selected row.
   Impact: Added explicit saved investigation selection and tied new span notes to that selected investigation.
+- Date: 2026-05-11
+  Discovery: A final production audit found the Next.js Server Components advisory now requires `next>=15.5.16`.
+  Impact: Upgraded `next` and `eslint-config-next` to `15.5.16` and reconfirmed the full preflight gate.
 
 ## Decision Log
 
@@ -45,7 +48,7 @@ Completed the final hardening slice:
 
 ## Verification Evidence
 
-- `pnpm audit --prod --audit-level moderate`: passed with no known vulnerabilities after dependency updates.
+- `pnpm audit --prod --audit-level moderate`: passed with no known vulnerabilities after upgrading to Next 15.5.16.
 - `pnpm --filter @branchlab/web typecheck`: passed.
 - `pnpm --filter @branchlab/policy test`: passed.
 - `pnpm --filter @branchlab/web test -- investigationService.test.ts spanAnnotationService.test.ts`: passed.
@@ -81,7 +84,9 @@ Make the public repository harder to embarrass: README/docs links should be mach
 - [x] Fix docs hub diagram paths
 - [x] Remove ignored `.DS_Store` files from the working copy
 - [x] Run final gates
-- [ ] Commit and push
+- [x] Fix 100k-event ingest regression found by final preflight
+- [x] Rerun final gates after perf fix
+- [x] Commit and push
 
 ## Surprises & Discoveries
 
@@ -91,6 +96,12 @@ Make the public repository harder to embarrass: README/docs links should be mach
 - Date: 2026-05-08
   Discovery: Markdown link extraction must ignore fenced and inline code because documentation includes literal example paths.
   Impact: The checker strips code before validating links.
+- Date: 2026-05-11
+  Discovery: A fresh preflight failed the 100k-event ingest budget at `34041.07ms` while compare remained fast.
+  Impact: Large run saves now rebuild secondary query indexes around bulk ingest instead of maintaining them row by row.
+- Date: 2026-05-11
+  Discovery: The visual matrix snapshots were coupled to browser-project execution order because seeded data accumulated across Chromium, Firefox, and WebKit.
+  Impact: Visual snapshot tests now reset the isolated E2E data root before each seeded snapshot and regenerated deterministic baselines.
 
 ## Decision Log
 
@@ -107,7 +118,8 @@ Implemented the final public repo polish slice:
 - Aligned dependency audit scripts and docs on the moderate-or-higher production standard.
 - Fixed the docs hub diagram path text.
 - Removed ignored `.DS_Store` files from the working copy.
-- Full `pnpm preflight` passed with the new gate included.
+- Full `pnpm preflight` passed with the new gate included before the May 11 revalidation.
+- A May 11 revalidation exposed and fixed a 100k-event ingest regression in the large-run persistence path, patched Next.js to 15.5.16, and removed state coupling from visual matrix snapshots.
 
 ## Verification Evidence
 
@@ -116,6 +128,11 @@ Implemented the final public repo polish slice:
 - `pnpm check`: passed.
 - `git diff --check`: passed.
 - `pnpm preflight`: passed end-to-end, including check, E2E, demo seed, visual snapshots, cross-browser visual matrix, 100k perf budget, moderate dependency audit, SAST, secret scan, docs links, and production smoke build.
+- `pnpm perf:budget`: failed at `34041.07ms` before the bulk-index rebuild fix, then passed at `11329.6ms` in final preflight.
+- `pnpm e2e:visual && pnpm e2e:matrix`: passed after visual snapshots reset isolated data before each seeded capture.
+- `pnpm preflight`: passed end-to-end on Next 15.5.16, including check, E2E, demo seed, visual snapshots, cross-browser matrix, 100k perf budget, moderate dependency audit, SAST, secret scan, docs links, and production smoke build.
+- `pnpm --filter @branchlab/web test -- runsRepo.test.ts`: passed with regression coverage for index recreation.
+- `pnpm --filter @branchlab/web typecheck`: passed.
 
 ---
 

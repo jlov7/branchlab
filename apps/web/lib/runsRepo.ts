@@ -65,6 +65,8 @@ export interface SaveRunInput {
   issues: Array<{ line: number; reason: string }>;
 }
 
+const DEFAULT_BULK_INDEX_REBUILD_THRESHOLD = 50_000;
+
 export function saveRun(input: SaveRunInput): { runId: string; insertedEvents: number } {
   const db = getDb();
   const now = new Date().toISOString();
@@ -77,6 +79,7 @@ export function saveRun(input: SaveRunInput): { runId: string; insertedEvents: n
   const lastTs = events[events.length - 1]?.ts ?? firstTs;
   const durationMs = Math.max(0, Date.parse(lastTs) - Date.parse(firstTs));
 
+  const rebuildIndexes = shouldRebuildBulkIndexes(events.length);
   db.exec("BEGIN");
   try {
     db.prepare(
@@ -125,6 +128,10 @@ export function saveRun(input: SaveRunInput): { runId: string; insertedEvents: n
 
     db.prepare(`DELETE FROM events WHERE run_id = ?`).run(runId);
     db.prepare(`DELETE FROM trace_ir_events WHERE run_id = ?`).run(runId);
+
+    if (rebuildIndexes) {
+      dropRunBulkIndexes();
+    }
 
     const traceIrEvents = events.map((event, sequence) => traceIrFromNormalizedEvent(event, sequence));
 
@@ -177,6 +184,10 @@ export function saveRun(input: SaveRunInput): { runId: string; insertedEvents: n
         generated_at = excluded.generated_at
     `,
     ).run(runId, replayFingerprint(traceIrEvents), traceIrEvents.length, now);
+
+    if (rebuildIndexes) {
+      createRunBulkIndexes();
+    }
 
     db.exec("COMMIT");
   } catch (error) {
@@ -622,4 +633,33 @@ function parseJson<T>(value: string, fallback: T): T {
   } catch {
     return fallback;
   }
+}
+
+function shouldRebuildBulkIndexes(eventCount: number): boolean {
+  const threshold = Number(process.env.BRANCHLAB_BULK_INDEX_REBUILD_THRESHOLD ?? DEFAULT_BULK_INDEX_REBUILD_THRESHOLD);
+  return Number.isFinite(threshold) && eventCount >= threshold;
+}
+
+function dropRunBulkIndexes(): void {
+  getDb().exec(`
+    DROP INDEX IF EXISTS idx_events_run_ts;
+    DROP INDEX IF EXISTS idx_events_run_type;
+    DROP INDEX IF EXISTS idx_events_run_call;
+    DROP INDEX IF EXISTS idx_trace_ir_run_sequence;
+    DROP INDEX IF EXISTS idx_trace_ir_run_kind;
+    DROP INDEX IF EXISTS idx_trace_ir_run_hash;
+    DROP INDEX IF EXISTS idx_trace_ir_tool_call;
+  `);
+}
+
+function createRunBulkIndexes(): void {
+  getDb().exec(`
+    CREATE INDEX IF NOT EXISTS idx_events_run_ts ON events(run_id, ts);
+    CREATE INDEX IF NOT EXISTS idx_events_run_type ON events(run_id, type);
+    CREATE INDEX IF NOT EXISTS idx_events_run_call ON events(run_id, call_id);
+    CREATE INDEX IF NOT EXISTS idx_trace_ir_run_sequence ON trace_ir_events(run_id, sequence);
+    CREATE INDEX IF NOT EXISTS idx_trace_ir_run_kind ON trace_ir_events(run_id, event_kind);
+    CREATE INDEX IF NOT EXISTS idx_trace_ir_run_hash ON trace_ir_events(run_id, hash);
+    CREATE INDEX IF NOT EXISTS idx_trace_ir_tool_call ON trace_ir_events(run_id, tool_call_id);
+  `);
 }

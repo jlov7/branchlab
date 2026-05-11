@@ -15,6 +15,8 @@ export function getDb(): DatabaseSync {
     db.exec("PRAGMA journal_mode = WAL;");
     db.exec("PRAGMA synchronous = NORMAL;");
     db.exec("PRAGMA foreign_keys = ON;");
+    db.exec("PRAGMA temp_store = MEMORY;");
+    db.exec("PRAGMA cache_size = -200000;");
     applyMigrations(db);
 
     globalDb.db = db;

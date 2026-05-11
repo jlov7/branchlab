@@ -16,16 +16,27 @@ async function prepareVisualSnapshot(page: Page): Promise<void> {
   });
 }
 
+async function resetVisualData(page: Page): Promise<void> {
+  const reset = await page.request.post("/api/settings/delete-all");
+  expect(reset.ok()).toBeTruthy();
+}
+
+async function seedVisualData(page: Page): Promise<void> {
+  await resetVisualData(page);
+  const seed = await page.request.post("/api/demo/seed");
+  expect(seed.ok()).toBeTruthy();
+}
+
 test.describe("visual regression", () => {
   test("landing snapshot", async ({ page }) => {
+    await resetVisualData(page);
     await page.goto("/");
     await prepareVisualSnapshot(page);
     await expect(page).toHaveScreenshot("landing.png", { fullPage: true });
   });
 
   test("runs snapshot", async ({ page }) => {
-    const seed = await page.request.post("/api/demo/seed");
-    expect(seed.ok()).toBeTruthy();
+    await seedVisualData(page);
     await page.goto("/runs");
     await expect(page).toHaveURL(/\/runs/, { timeout: NAV_TIMEOUT_MS });
     await prepareVisualSnapshot(page);
@@ -33,9 +44,7 @@ test.describe("visual regression", () => {
   });
 
   test("compare snapshot", async ({ page }) => {
-    await page.goto("/");
-    const seed = await page.request.post("/api/demo/seed");
-    expect(seed.ok()).toBeTruthy();
+    await seedVisualData(page);
 
     const branchRes = await page.request.post("/api/branches", {
       data: {

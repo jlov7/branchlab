@@ -37,7 +37,7 @@ This is the implementation burn-down for taking BranchLab from the Phase 0 + Tra
 - `pnpm audit --prod --audit-level moderate`: passed with no known vulnerabilities.
 - `pnpm sast`: passed.
 - `pnpm scan:secrets`: passed.
-- `pnpm --filter @branchlab/web perf:budget`: passed at 100k events with ingest `22972.79ms`, compare `0.08ms`, RSS `460MB`.
+- `pnpm --filter @branchlab/web perf:budget`: passed at 100k events with ingest `11329.6ms`, compare `0.06ms`, RSS `608MB`.
 - 1M-event scale run: passed in a throwaway temp root with ingest `280738.28ms`, compare `0.06ms`, RSS `1737MB`.
 - `pnpm --filter @branchlab/web benchmark:suite`: passed.
 - `pnpm demo`: passed.

@@ -10,14 +10,14 @@ The March 2026 release artifacts remain useful historical evidence, but they are
 
 ## Phase 0 Findings
 
-- Dependency security: the May 2026 audit found a high-severity Next.js advisory in the installed 15.5.x line. The baseline must stay on a patched Next 15 release unless and until a separate Next 16 compatibility pass is completed.
+- Dependency security: the May 2026 audit found a high-severity Next.js advisory in the installed 15.5.x line. The baseline is now patched to Next 15.5.16 and must stay on a safe Next 15 release unless and until a separate Next 16 compatibility pass is completed.
 - Linting: `next lint` is deprecated and should not be part of the future release gate.
 - Data safety: tests and benchmark scripts must run under isolated `BRANCHLAB_ROOT` data directories so they never reset the user's real `.atl` folder.
 - Documentation: older “100/100” and “no residual risk” claims are historical, not current frontier status.
 
 ## Implemented In This Slice
 
-- Patched Next.js to the safe 15.5 patch line.
+- Patched Next.js to 15.5.16, the safe 15.5 patch line available for the active advisory.
 - Switched the web lint command to ESLint CLI with flat config.
 - Added explicit reset safety checks for destructive local data deletion.
 - Isolated Vitest, Playwright, performance, benchmark, and profile harness data roots.
@@ -57,5 +57,5 @@ The March 2026 release artifacts remain useful historical evidence, but they are
 Gate notes:
 - `pnpm audit --prod --audit-level moderate` exits cleanly with no known vulnerabilities.
 - E2E ran with an isolated data root (`playwright:dataRoot=/tmp/branchlab-e2e-*`).
-- 100k-event perf budget passed with ingest `22972.79ms`, compare `0.08ms`, RSS `460MB`.
+- 100k-event perf budget passed with ingest `11329.6ms`, compare `0.06ms`, RSS `608MB`.
 - 1M-event scale gate passed in a throwaway temp root with ingest `280738.28ms`, compare `0.06ms`, RSS `1737MB`.

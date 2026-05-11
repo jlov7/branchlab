@@ -13,7 +13,7 @@ This is the current no-fluff scorecard for BranchLab after the frontier, fronten
 | Evidence quality | 97 | Redacted evidence packs include normalized trace, Trace IR, trace physics, evals, policies, investigations, span notes, provenance. |
 | Local-first data safety | 98 | Isolated test roots, reset guardrails, local SQLite/blob store, backup/restore/recovery scripts. |
 | Security posture | 96 | Moderate-or-higher production audit passes, SAST and secret scans are local gates, export redaction/XSS tests exist. |
-| Scale posture | 94 | 100k perf budget and 1M-event scale gate have passed; streaming chunk progress remains the main gap. |
+| Scale posture | 95 | 100k perf budget passes with bulk-index rebuild ingest optimization, and the 1M-event scale gate has passed; streaming chunk progress remains the main gap. |
 | Frontend craft | 95 | Dense debugger-grade cockpit, cross-browser visual matrix, accessibility checks, verified screenshots and overview video. |
 | Adapter breadth | 94 | BranchLab JSONL, Trace IR, OTel GenAI, OpenAI/Anthropic-style, LangSmith-style, MLflow-style, malformed JSONL fixtures. |
 | Runtime realism | 88 | Guarded runtime records exist; full hosted OpenAI Responses/Agents re-exec with sandbox/tool trace semantics is still future work. |
@@ -30,6 +30,9 @@ Current weighted estimate: **96.3/100**.
 - [x] Remove stale moderate-advisory caveats from public docs.
 - [x] Add automated Markdown/local asset link checking to the public repo gate.
 - [x] Align README, CONTRIBUTING, PR template, and preflight around the same docs/audit quality bar.
+- [x] Restore 100k-event ingest headroom with bulk-index rebuilds for large run saves.
+- [x] Patch final Next.js advisory to 15.5.16 and rerun the full public preflight.
+- [x] Make visual matrix snapshots reset isolated data before each seeded capture.
 - [ ] Full hosted OpenAI Responses/Agents re-exec with hosted-tool trace capture, sandbox state, approval semantics, and prompt-caching metadata.
 - [ ] Chunk-level streaming import progress and throughput charts for million-event traces.
 - [ ] Interactive graph layout controls and divergence heatmap inspection beyond the compact deterministic panel.

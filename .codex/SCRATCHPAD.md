@@ -2,7 +2,7 @@
 Autonomous public-readiness final pass: repo structure, README/docs quality, automated docs-link hygiene, and release gate alignment.
 
 ## Status
-Public-readiness final pass implemented and verified. `pnpm preflight` passes end-to-end with the new docs-link gate included.
+Final preflight passed on the patched Next 15.5.16 line. A fresh `pnpm preflight` exposed a real 100k-event ingest regression and a state-coupled visual matrix baseline; both are fixed.
 
 ## Active Plan
 1. [x] Inspect repo state, docs hub, README, ignored junk, and existing release scripts
@@ -11,7 +11,9 @@ Public-readiness final pass implemented and verified. `pnpm preflight` passes en
 4. [x] Align dependency audit script with moderate-or-higher public standard
 5. [x] Fix docs hub diagram paths and remove ignored `.DS_Store` files
 6. [x] Run final gates
-7. [ ] Commit and push the completed slice
+7. [x] Fix 100k-event ingest regression found during final preflight
+8. [x] Rerun full preflight after the perf fix, Next patch, and visual determinism fix
+9. [x] Commit and push the completed slice
 
 ## Decisions Made
 - Add a deep `tracePhysics` module on top of existing Trace IR and causal utilities instead of rewriting persistence or UI callers in this slice.
